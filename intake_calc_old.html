@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gravity Seawater Intake Design Calculator</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-elev: #1a2129;
+    --bg-card: #1e2630;
+    --border: #2a3441;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #79c0ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --amber: #d29922;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(90deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  header .meta {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  button {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  button:hover { background: #28323e; border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #0b0e13; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { background: var(--accent-2); }
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .toggle input { accent-color: var(--accent); }
+
+  nav.tabs {
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+  nav.tabs button {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 12px 18px;
+    color: var(--text-dim);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  nav.tabs button.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  nav.tabs button:hover { color: var(--text); background: transparent; }
+
+  main {
+    padding: 20px 24px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card h3 {
+    margin: 12px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 130px 60px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .input-row label {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .input-row input {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    text-align: right;
+    width: 100%;
+  }
+  .input-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .input-row .unit {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .out-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 13px;
+  }
+  .out-row:last-child { border-bottom: none; }
+  .out-row .key { color: var(--text-dim); }
+  .out-row .val { font-family: var(--mono); color: var(--text); font-weight: 500; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+  .badge.pass { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.4); }
+  .badge.fail { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.4); }
+  .badge.warn { background: rgba(210,153,34,0.15); color: var(--amber); border: 1px solid rgba(210,153,34,0.4); }
+
+  .hot-red { color: var(--red) !important; font-weight: 700; }
+  .hot-amber { color: var(--amber) !important; font-weight: 600; }
+  .hot-green { color: var(--green) !important; }
+
+  table.checks {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.checks th, table.checks td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  table.checks th {
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  table.checks td.val { font-family: var(--mono); }
+
+  .dn-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .dn {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 4px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .dn.recommended {
+    background: rgba(88,166,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    background: #0d1117;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+
+  .schematic-card { padding: 16px; }
+  .info-line {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin: 4px 0;
+  }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 5px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+  .legend .lf::before { background: #58a6ff; }
+  .legend .lm::before { background: #d29922; }
+  .legend .la::before { background: #3fb950; }
+  .legend .lr::before { background: #f85149; }
+
+  .note {
+    font-size: 12px;
+    color: var(--text-dim);
+    background: rgba(88,166,255,0.05);
+    border-left: 3px solid var(--accent);
+    padding: 8px 12px;
+    margin: 10px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .warn-note {
+    border-left-color: var(--amber);
+    background: rgba(210,153,34,0.05);
+    color: #e8d6a3;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    header, nav.tabs, .toolbar, .no-print { display: none !important; }
+    .panel { display: block !important; page-break-after: always; }
+    .panel:last-child { page-break-after: auto; }
+    main { padding: 12mm; max-width: none; }
+    .card { background: white; border: 1px solid #999; box-shadow: none; color: black; page-break-inside: avoid; }
+    .card h2, .card h3, .out-row .val, .info-line { color: black; }
+    .out-row .key, .input-row label { color: #444; }
+    .input-row input { background: #f7f7f7; color: black; border-color: #ccc; }
+    .badge.pass { background: #e6f4ea; color: #1e7e34; border-color: #1e7e34; }
+    .badge.fail { background: #fbe9e7; color: #b71c1c; border-color: #b71c1c; }
+    .badge.warn { background: #fff3e0; color: #8a5500; border-color: #8a5500; }
+    canvas { background: white; border: 1px solid #ccc; }
+    .dn { background: white; border: 1px solid #ccc; color: #444; }
+    .dn.recommended { background: #e6f0ff; color: #003e9b; border-color: #003e9b; }
+    @page { size: A4; margin: 12mm; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Gravity Seawater Intake Design Calculator</h1>
+    <div class="meta" id="meta-line">ρ = 1025 kg/m³ · ν = 1.04e-6 m²/s · g = 9.81 m/s²</div>
+  </div>
+  <div class="toolbar no-print">
+    <label class="toggle">
+      <input type="checkbox" id="emergency"> Emergency: 1 pipe @ Q_max
+    </label>
+    <button onclick="resetDefaults()">Reset</button>
+    <button class="primary" onclick="window.print()">Print A4</button>
+  </div>
+</header>
+
+<nav class="tabs no-print">
+  <button class="tab-btn active" data-tab="inputs">Inputs</button>
+  <button class="tab-btn" data-tab="head">Head Budget</button>
+  <button class="tab-btn" data-tab="pipe">Pipe Sizing</button>
+  <button class="tab-btn" data-tab="sump">Sump Design</button>
+  <button class="tab-btn" data-tab="checks">Velocity &amp; Checks</button>
+  <button class="tab-btn" data-tab="maint">Maintenance</button>
+</nav>
+
+<main>
+
+<!-- =============== INPUTS =============== -->
+<section class="panel active" id="panel-inputs">
+  <div class="grid-2">
+    <div class="card">
+      <h2>Flow &amp; Geometry</h2>
+      <div class="input-row"><label>Maximum design flow Q_max</label><input type="number" id="Q_max_m3hr" step="10"><span class="unit">m³/hr</span></div>
+      <div class="input-row"><label>Minimum design flow Q_min</label><input type="number" id="Q_min_m3hr" step="10"><span class="unit">m³/hr</span></div>
+      <div class="input-row"><label>Number of intake pipes</label><input type="number" id="pipes_count" step="1" min="1"><span class="unit">—</span></div>
+      <div class="input-row"><label>Pipe length (intake to sump) L</label><input type="number" id="L_m" step="10"><span class="unit">m</span></div>
+      <div class="input-row"><label>Pipe roughness ε</label><input type="number" id="epsilon_mm" step="0.0001"><span class="unit">mm</span></div>
+      <div class="input-row"><label>Pipe wall thickness e_wall</label><input type="number" id="e_wall_mm" step="1"><span class="unit">mm</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Levels &amp; Site</h2>
+      <div class="input-row"><label>Lowest Astronomical Tide h_LAT</label><input type="number" id="h_LAT_m" step="0.05"><span class="unit">m MSL</span></div>
+      <div class="input-row"><label>Highest Astronomical Tide h_HAT</label><input type="number" id="h_HAT_m" step="0.05"><span class="unit">m MSL</span></div>
+      <div class="input-row"><label>Seabed level z_seabed</label><input type="number" id="z_seabed_m" step="0.1"><span class="unit">m MSL</span></div>
+      <div class="input-row"><label>Sump water surface z_sump</label><input type="number" id="z_sump_m" step="0.05"><span class="unit">m MSL</span></div>
+      <div class="input-row"><label>Seawater temperature</label><input type="number" id="temp_C" step="0.5"><span class="unit">°C</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Loss Coefficients (K-factors)</h2>
+    <div class="grid-3">
+      <div class="input-row"><label>Screen (fouled) K_screen</label><input type="number" id="K_screen_fouled" step="0.1"><span class="unit">—</span></div>
+      <div class="input-row"><label>Bellmouth entrance K_entrance</label><input type="number" id="K_entrance" step="0.05"><span class="unit">—</span></div>
+      <div class="input-row"><label>Bend K_bend</label><input type="number" id="K_bend" step="0.05"><span class="unit">—</span></div>
+      <div class="input-row"><label>Valve K_valve</label><input type="number" id="K_valve" step="0.05"><span class="unit">—</span></div>
+      <div class="input-row"><label>Exit to sump K_exit</label><input type="number" id="K_exit" step="0.05"><span class="unit">—</span></div>
+    </div>
+    <div class="note">All inputs recalculate every output instantly. ρ and ν update live with temperature using the embedded correlations.</div>
+  </div>
+</section>
+
+<!-- =============== HEAD BUDGET =============== -->
+<section class="panel" id="panel-head">
+  <div class="grid-2">
+    <div class="card">
+      <h2>Available Head</h2>
+      <div class="out-row"><span class="key">H_avail at LAT (h_LAT − z_sump)</span><span class="val" id="H_avail_min">—</span></div>
+      <div class="out-row"><span class="key">H_avail at HAT (h_HAT − z_sump)</span><span class="val" id="H_avail_max">—</span></div>
+      <div class="out-row"><span class="key">Required head H_required</span><span class="val" id="H_required">—</span></div>
+      <div class="out-row"><span class="key">Margin at LAT</span><span class="val" id="H_margin">—</span></div>
+      <div class="out-row"><span class="key">Margin at HAT</span><span class="val" id="H_margin_HAT">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Loss Breakdown</h2>
+      <div class="out-row"><span class="key">Friction loss h_f</span><span class="val" id="hf">—</span></div>
+      <div class="out-row"><span class="key">Minor losses Σ K · V²/2g</span><span class="val" id="hm_total">—</span></div>
+      <div class="out-row"><span class="key">Velocity head V²/2g</span><span class="val" id="vhead">—</span></div>
+      <div class="out-row"><span class="key">Reynolds number Re</span><span class="val" id="Re_value">—</span></div>
+      <div class="out-row"><span class="key">Friction factor f (Swamee–Jain)</span><span class="val" id="f_val">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Head Budget — Stacked Bar (m)</h2>
+    <canvas id="head-canvas" height="220"></canvas>
+    <div class="legend">
+      <span class="la">Available head (LAT)</span>
+      <span class="lf">Friction</span>
+      <span class="lm">Minor losses</span>
+      <span class="lr">Required total</span>
+    </div>
+  </div>
+</section>
+
+<!-- =============== PIPE SIZING =============== -->
+<section class="panel" id="panel-pipe">
+  <div class="grid-2">
+    <div class="card">
+      <h2>Recommended Pipe</h2>
+      <div class="out-row"><span class="key">Iterated pipe diameter D</span><span class="val" id="D_m">—</span></div>
+      <div class="out-row"><span class="key">Selected HDPE DN (OD)</span><span class="val" id="DN_mm">—</span></div>
+      <div class="out-row"><span class="key">Velocity at Q_max (per pipe)</span><span class="val" id="V_at_Qmax">—</span></div>
+      <div class="out-row"><span class="key">Velocity at Q_min (single pipe)</span><span class="val" id="V_at_Qmin">—</span></div>
+      <div class="out-row"><span class="key">Q per pipe at Q_max</span><span class="val" id="Q_per_pipe">—</span></div>
+      <div class="out-row"><span class="key">Flow regime</span><span class="val" id="regime">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2>HDPE DN Catalog</h2>
+      <p class="info-line">Recommended size highlighted. Iteration: D = 0.30…1.50 m, step 0.05 m. Smallest D where margin&nbsp;&gt;&nbsp;0 and 0.8 ≤ V ≤ 2.0&nbsp;m/s is selected; rounded up to nearest catalog DN.</p>
+      <div class="dn-grid" id="dn-grid"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Iteration Trace (D vs V vs H_margin)</h2>
+    <canvas id="iter-canvas" height="220"></canvas>
+    <p class="info-line" id="iter-info">—</p>
+  </div>
+</section>
+
+<!-- =============== SUMP =============== -->
+<section class="panel" id="panel-sump">
+  <div class="grid-2">
+    <div class="card">
+      <h2>Submergence &amp; Vortex</h2>
+      <div class="out-row"><span class="key">Bellmouth diameter D_bell ≈ 1.5·D</span><span class="val" id="D_bell">—</span></div>
+      <div class="out-row"><span class="key">Min. submergence S_min = 0.7·V·√D</span><span class="val" id="S_min">—</span></div>
+      <div class="out-row"><span class="key">Pipe invert z_invert = z_seabed − 1.2 − D</span><span class="val" id="z_invert">—</span></div>
+      <div class="out-row"><span class="key">Bellmouth top z_bellmouth_top</span><span class="val" id="z_bellmouth_top">—</span></div>
+      <div class="out-row"><span class="key">Submergence above bell at LAT</span><span class="val" id="submergence_actual">—</span></div>
+      <div class="out-row"><span class="key">Submergence check</span><span class="val" id="submergence_check">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Sump Geometry</h2>
+      <div class="out-row"><span class="key">Retention time t_retention</span><span class="val">180 s</span></div>
+      <div class="out-row"><span class="key">Sump volume V_sump = Q_max · t</span><span class="val" id="sump_volume">—</span></div>
+      <div class="out-row"><span class="key">Sump depth |z_sump|+2.0</span><span class="val" id="sump_depth">—</span></div>
+      <div class="out-row"><span class="key">Sump width max(2·D_bell, 2.0)</span><span class="val" id="sump_width">—</span></div>
+      <div class="out-row"><span class="key">Sump length</span><span class="val" id="sump_length">—</span></div>
+      <div class="out-row"><span class="key">Sump L × W × D</span><span class="val" id="sump_LWD">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sectional Schematic</h2>
+    <canvas id="schematic-canvas" height="320"></canvas>
+    <p class="info-line">All elevations referenced to MSL (m). Scale not literal; relative levels preserved.</p>
+  </div>
+</section>
+
+<!-- =============== CHECKS =============== -->
+<section class="panel" id="panel-checks">
+  <div class="card">
+    <h2>Design Checks</h2>
+    <table class="checks">
+      <thead><tr><th>#</th><th>Check</th><th>Criterion</th><th>Computed</th><th>Status</th></tr></thead>
+      <tbody id="checks-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Self-Cleaning &amp; Slot Velocity</h2>
+      <div class="out-row"><span class="key">Self-cleansing velocity V_sc (sediment)</span><span class="val" id="V_sc">—</span></div>
+      <div class="out-row"><span class="key">Max screen slot velocity V_slot</span><span class="val">≤ 0.15 m/s</span></div>
+      <div class="out-row"><span class="key">Operating V at Q_max</span><span class="val" id="V_op">—</span></div>
+      <p class="info-line">V_sc derived from Shields/Camp: V_sc = √(8·0.04/f · g · (s−1) · d), with s=2.65 and d=0.0002 m.</p>
+    </div>
+
+    <div class="card">
+      <h2>Surge / Water Hammer</h2>
+      <div class="out-row"><span class="key">Wave celerity a</span><span class="val" id="celerity">—</span></div>
+      <div class="out-row"><span class="key">Joukowsky head ΔH = a·V/g</span><span class="val" id="surge_head">—</span></div>
+      <div class="out-row"><span class="key">Min. valve closure time t_close = 2·L/a</span><span class="val" id="t_close">—</span></div>
+      <p class="info-line">a = 1480 / √(1 + (2.2e9 / 3e8) · (D / e_wall))</p>
+    </div>
+  </div>
+</section>
+
+<!-- =============== MAINTENANCE =============== -->
+<section class="panel" id="panel-maint">
+  <div class="grid-2">
+    <div class="card">
+      <h2>Chlorination</h2>
+      <div class="out-row"><span class="key">Continuous Cl₂ residual</span><span class="val">0.2 – 0.5 mg/L</span></div>
+      <div class="out-row"><span class="key">Shock dose (weekly)</span><span class="val">2 – 5 mg/L for 30 min</span></div>
+      <div class="out-row"><span class="key">Dosing point</span><span class="val">Bellmouth + sump inlet</span></div>
+      <p class="info-line">Marine biofouling control: continuous low-residual chlorination supplemented by periodic shock dosing during high biological activity.</p>
+    </div>
+
+    <div class="card">
+      <h2>Pigging &amp; Cleaning</h2>
+      <div class="out-row"><span class="key">Foam-pig propulsion velocity</span><span class="val">1.0 – 3.0 m/s</span></div>
+      <div class="out-row"><span class="key">Operating V at Q_max</span><span class="val" id="V_op_2">—</span></div>
+      <div class="out-row"><span class="key">Pigging interval (typical)</span><span class="val">6 – 12 months</span></div>
+      <div class="out-row"><span class="key">Diver inspection</span><span class="val">Annual; before storm season</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Operational Notes</h2>
+    <ul style="margin:6px 0 0; padding-left:20px; color:var(--text-dim); font-size:13px; line-height:1.7;">
+      <li>Maintain V ≥ 0.6 m/s in single-pipe operation to prevent sediment deposition.</li>
+      <li>Keep both pipes balanced via butterfly valve modulation; isolate one pipe for screen cleaning during off-peak.</li>
+      <li>Monitor differential pressure across coarse screens — replace/clean when ΔP exceeds 50% of clean value.</li>
+      <li>Verify air-release valves at high points are leak-free; trapped air increases hf and risks vortex.</li>
+      <li>Surge analysis must be repeated whenever closure time, valve type, or pipe schedule changes.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+const DEFAULTS = {
+  Q_max_m3hr: 1500,
+  Q_min_m3hr: 700,
+  L_m: 550,
+  h_LAT_m: -0.3,
+  h_HAT_m: 2.5,
+  z_seabed_m: -4.5,
+  z_sump_m: -1.5,
+  temp_C: 28,
+  epsilon_mm: 0.0015,
+  e_wall_mm: 50,
+  K_screen_fouled: 2.5,
+  K_entrance: 0.05,
+  K_bend: 0.3,
+  K_valve: 0.15,
+  K_exit: 1.0,
+  pipes_count: 2
+};
+
+const HDPE_DN = [315, 400, 500, 630, 710, 800, 900, 1000];
+
+const G = 9.81;
+
+// ---------- Utility ----------
+function $(id) { return document.getElementById(id); }
+function fmt(v, d = 3) {
+  if (v === null || v === undefined || !isFinite(v)) return "—";
+  if (Math.abs(v) >= 1e6) return v.toExponential(2);
+  return Number(v).toFixed(d);
+}
+function getInput(id) { return parseFloat($(id).value); }
+function setInput(id, v) { $(id).value = v; }
+
+function rhoOf(temp) { return 1025 - 0.2 * (temp - 25); }
+function nuOf(temp) {
+  const t = temp - 20;
+  return 1.79e-6 / (1 + 0.033 * t + 0.00022 * t * t);
+}
+
+function frictionFactor(eps_m, D, Re) {
+  if (Re <= 0) return 0;
+  const arg = eps_m / (3.7 * D) + 5.74 / Math.pow(Re, 0.9);
+  const den = Math.log10(arg);
+  return 0.25 / (den * den);
+}
+
+function computeFor(D, Q_per_pipe, L, eps_m, nu, sumK) {
+  const A = Math.PI * D * D / 4;
+  const V = Q_per_pipe / A;
+  const Re = V * D / nu;
+  const f = frictionFactor(eps_m, D, Re);
+  const vhead = V * V / (2 * G);
+  const hf = f * (L / D) * vhead;
+  const hm = sumK * vhead;
+  return { D, A, V, Re, f, vhead, hf, hm, H_req: hf + hm };
+}
+
+function pickDN(D_m) {
+  const Dmm = D_m * 1000;
+  for (const dn of HDPE_DN) if (dn >= Dmm) return dn;
+  return HDPE_DN[HDPE_DN.length - 1];
+}
+
+// ---------- Main calc ----------
+let LAST = null;
+
+function calc() {
+  const I = {};
+  for (const k of Object.keys(DEFAULTS)) I[k] = getInput(k);
+  const emergency = $("emergency").checked;
+
+  const rho = rhoOf(I.temp_C);
+  const nu = nuOf(I.temp_C);
+  const eps_m = I.epsilon_mm / 1000;
+  const e_wall_m = I.e_wall_mm / 1000;
+  const sumK = I.K_screen_fouled + I.K_entrance + I.K_bend + I.K_valve + I.K_exit;
+
+  const Q_max_m3s = I.Q_max_m3hr / 3600;
+  const Q_min_m3s = I.Q_min_m3hr / 3600;
+
+  const pipes_active = emergency ? 1 : I.pipes_count;
+  const Q_per_pipe = Q_max_m3s / pipes_active;
+  const Q_per_pipe_min = Q_min_m3s; // single pipe at Q_min for the V_min check
+
+  const H_avail_min = I.h_LAT_m - I.z_sump_m;
+  const H_avail_max = I.h_HAT_m - I.z_sump_m;
+
+  // Iteration: D from 0.3..1.5 step 0.05, smallest D where H_margin > 0 and 0.8 <= V <= 2.0
+  const trace = [];
+  let chosen = null;
+  for (let D = 0.30; D <= 1.5001; D += 0.05) {
+    const Dr = Math.round(D * 100) / 100;
+    const r = computeFor(Dr, Q_per_pipe, I.L_m, eps_m, nu, sumK);
+    const margin = H_avail_min - r.H_req;
+    const ok_margin = margin > 0;
+    const ok_V = r.V >= 0.8 && r.V <= 2.0;
+    trace.push({ D: Dr, V: r.V, H_req: r.H_req, margin, ok: ok_margin && ok_V });
+    if (!chosen && ok_margin && ok_V) chosen = { D: Dr, ...r, margin };
+  }
+  if (!chosen) {
+    // Fall back to largest tried
+    const D = 1.5;
+    const r = computeFor(D, Q_per_pipe, I.L_m, eps_m, nu, sumK);
+    chosen = { D, ...r, margin: H_avail_min - r.H_req };
+  }
+
+  const DN = pickDN(chosen.D);
+  const D_used = DN / 1000;
+  const final = computeFor(D_used, Q_per_pipe, I.L_m, eps_m, nu, sumK);
+  const margin_LAT = H_avail_min - final.H_req;
+  const margin_HAT = H_avail_max - final.H_req;
+
+  // V at Q_min (single pipe)
+  const V_qmin = Q_per_pipe_min / (Math.PI * D_used * D_used / 4);
+
+  // Submergence/vortex
+  const D_bell = 1.5 * D_used;
+  const S_min = 0.7 * final.V * Math.sqrt(D_used);
+  const z_invert = I.z_seabed_m - 1.2 - D_used;
+  const z_bellmouth_top = z_invert + D_used;
+  const submergence_actual = I.h_LAT_m - z_bellmouth_top;
+  const submergence_ok = submergence_actual >= S_min;
+
+  // Sump
+  const t_retention = 180;
+  const V_sump = Q_max_m3s * t_retention;
+  const sump_depth = Math.abs(I.z_sump_m) + 2.0;
+  const sump_width = Math.max(2 * D_bell, 2.0);
+  const sump_length = V_sump / (sump_width * sump_depth);
+
+  // Self-cleansing velocity (Camp/Shields with f from final)
+  const V_sc = Math.sqrt(8 * 0.04 / final.f * G * (2.65 - 1) * 0.0002);
+
+  // Surge
+  const a_celerity = 1480 / Math.sqrt(1 + (2.2e9 / 3e8) * (D_used / e_wall_m));
+  const dH_surge = a_celerity * final.V / G;
+  const t_close_min = 2 * I.L_m / a_celerity;
+
+  // Regime
+  let regime = "—";
+  if (final.Re < 2300) regime = "Laminar";
+  else if (final.Re < 4000) regime = "Transitional";
+  else regime = "Turbulent";
+
+  LAST = {
+    I, rho, nu, eps_m, sumK, Q_max_m3s, Q_min_m3s, pipes_active, Q_per_pipe,
+    H_avail_min, H_avail_max, trace, chosen, DN, D_used, final,
+    margin_LAT, margin_HAT, V_qmin,
+    D_bell, S_min, z_invert, z_bellmouth_top, submergence_actual, submergence_ok,
+    V_sump, sump_depth, sump_width, sump_length, t_retention,
+    V_sc, a_celerity, dH_surge, t_close_min, regime, emergency
+  };
+
+  render();
+}
+
+// ---------- Render ----------
+function setText(id, txt, cls) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = txt;
+  el.classList.remove("hot-red", "hot-amber", "hot-green");
+  if (cls) el.classList.add(cls);
+}
+
+function badge(cond, label_pass = "PASS", label_fail = "FAIL") {
+  return cond
+    ? `<span class="badge pass">${label_pass}</span>`
+    : `<span class="badge fail">${label_fail}</span>`;
+}
+
+function render() {
+  const L = LAST;
+
+  $("meta-line").textContent =
+    `ρ = ${fmt(L.rho, 1)} kg/m³ · ν = ${L.nu.toExponential(2)} m²/s · g = 9.81 m/s² · ` +
+    `${L.emergency ? "EMERGENCY: 1 pipe @ Q_max" : `${L.I.pipes_count} pipes`}`;
+
+  // Head budget
+  setText("H_avail_min", fmt(L.H_avail_min, 3) + " m");
+  setText("H_avail_max", fmt(L.H_avail_max, 3) + " m");
+  setText("H_required", fmt(L.final.H_req, 3) + " m");
+  const marginCls = L.margin_LAT < 0.2 ? "hot-red" : (L.margin_LAT < 0.4 ? "hot-amber" : "hot-green");
+  setText("H_margin", fmt(L.margin_LAT, 3) + " m", marginCls);
+  setText("H_margin_HAT", fmt(L.margin_HAT, 3) + " m", L.margin_HAT < 0 ? "hot-red" : null);
+  setText("hf", fmt(L.final.hf, 3) + " m");
+  setText("hm_total", fmt(L.final.hm, 3) + " m");
+  setText("vhead", fmt(L.final.vhead, 4) + " m");
+  setText("Re_value", L.final.Re.toExponential(2));
+  setText("f_val", fmt(L.final.f, 5));
+
+  // Pipe sizing
+  setText("D_m", fmt(L.D_used, 3) + " m  (iterated " + fmt(L.chosen.D, 2) + " m)");
+  setText("DN_mm", "DN " + L.DN + " (OD " + L.DN + " mm)");
+  const vCls = (L.final.V < 0.8 || L.final.V > 2.0) ? "hot-red" : "hot-green";
+  setText("V_at_Qmax", fmt(L.final.V, 3) + " m/s", vCls);
+  const vMinCls = L.V_qmin < 0.6 ? "hot-red" : "hot-green";
+  setText("V_at_Qmin", fmt(L.V_qmin, 3) + " m/s" + (L.V_qmin < 0.6 ? "  ⚠ deposition risk" : ""), vMinCls);
+  setText("Q_per_pipe", fmt(L.Q_per_pipe, 4) + " m³/s");
+  setText("regime", L.regime + " (Re " + L.final.Re.toExponential(1) + ")");
+
+  // DN catalog
+  const dnGrid = $("dn-grid");
+  dnGrid.innerHTML = "";
+  for (const dn of HDPE_DN) {
+    const div = document.createElement("div");
+    div.className = "dn" + (dn === L.DN ? " recommended" : "");
+    div.textContent = "DN " + dn;
+    dnGrid.appendChild(div);
+  }
+
+  $("iter-info").textContent =
+    `Iterated min D = ${fmt(L.chosen.D, 2)} m → rounded up to DN ${L.DN}.  ` +
+    `Final V = ${fmt(L.final.V, 3)} m/s, H_req = ${fmt(L.final.H_req, 3)} m.`;
+
+  // Sump
+  setText("D_bell", fmt(L.D_bell, 3) + " m");
+  setText("S_min", fmt(L.S_min, 3) + " m");
+  setText("z_invert", fmt(L.z_invert, 3) + " m MSL");
+  setText("z_bellmouth_top", fmt(L.z_bellmouth_top, 3) + " m MSL");
+  setText("submergence_actual", fmt(L.submergence_actual, 3) + " m");
+  $("submergence_check").innerHTML = badge(L.submergence_ok);
+
+  setText("sump_volume", fmt(L.V_sump, 1) + " m³");
+  setText("sump_depth", fmt(L.sump_depth, 2) + " m");
+  setText("sump_width", fmt(L.sump_width, 2) + " m");
+  setText("sump_length", fmt(L.sump_length, 2) + " m");
+  setText("sump_LWD", `${fmt(L.sump_length, 2)} × ${fmt(L.sump_width, 2)} × ${fmt(L.sump_depth, 2)} m`);
+
+  // Self-cleansing & surge
+  setText("V_sc", fmt(L.V_sc, 3) + " m/s");
+  setText("V_op", fmt(L.final.V, 3) + " m/s");
+  setText("V_op_2", fmt(L.final.V, 3) + " m/s");
+  setText("celerity", fmt(L.a_celerity, 1) + " m/s");
+  setText("surge_head", fmt(L.dH_surge, 2) + " m");
+  setText("t_close", "≥ " + fmt(L.t_close_min, 2) + " s");
+
+  // Checks table
+  const checks = [
+    {
+      name: "Head margin at LAT",
+      crit: "> 0.20 m",
+      val: fmt(L.margin_LAT, 3) + " m",
+      ok: L.margin_LAT > 0.2
+    },
+    {
+      name: "Velocity at Q_max",
+      crit: "0.80 ≤ V ≤ 2.00 m/s",
+      val: fmt(L.final.V, 3) + " m/s",
+      ok: L.final.V >= 0.8 && L.final.V <= 2.0
+    },
+    {
+      name: "Velocity at Q_min (single pipe)",
+      crit: "≥ 0.60 m/s",
+      val: fmt(L.V_qmin, 3) + " m/s",
+      ok: L.V_qmin >= 0.6
+    },
+    {
+      name: "Submergence above bellmouth",
+      crit: "≥ S_min = " + fmt(L.S_min, 3) + " m",
+      val: fmt(L.submergence_actual, 3) + " m",
+      ok: L.submergence_ok
+    },
+    {
+      name: "Screen slot velocity",
+      crit: "≤ 0.15 m/s (design constraint)",
+      val: "≤ 0.15 m/s",
+      ok: true
+    },
+    {
+      name: "Margin at HAT (no reverse pressure)",
+      crit: "> 0 (sump can drain at HAT)",
+      val: fmt(L.margin_HAT, 3) + " m",
+      ok: L.margin_HAT > 0
+    }
+  ];
+  const tbody = $("checks-tbody");
+  tbody.innerHTML = "";
+  checks.forEach((c, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      `<td>${i + 1}</td>` +
+      `<td>${c.name}</td>` +
+      `<td>${c.crit}</td>` +
+      `<td class="val">${c.val}</td>` +
+      `<td>${badge(c.ok)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  drawHeadBudget();
+  drawIteration();
+  drawSchematic();
+}
+
+// ---------- Canvases ----------
+function fitCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = (canvas.getAttribute("height") || 220) * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: rect.width, h: parseInt(canvas.getAttribute("height") || 220) };
+}
+
+function drawHeadBudget() {
+  const c = $("head-canvas");
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#0d1117";
+  ctx.fillRect(0, 0, w, h);
+
+  const L = LAST;
+  const items = [
+    { label: "Available (LAT)", val: L.H_avail_min, color: "#3fb950" },
+    { label: "Required: hf", val: L.final.hf, color: "#58a6ff", stack: true },
+    { label: "Required: hm", val: L.final.hm, color: "#d29922", stack: true }
+  ];
+
+  // Layout: 2 bars - "Available" and "Required (hf+hm)"
+  const max = Math.max(L.H_avail_min, L.final.H_req, 0.5) * 1.15;
+  const padL = 60, padR = 20, padT = 20, padB = 36;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  const yScale = plotH / max;
+
+  // Axes
+  ctx.strokeStyle = "#2a3441";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB);
+  ctx.stroke();
+
+  // Y ticks
+  ctx.fillStyle = "#8b949e";
+  ctx.font = "11px ui-monospace, monospace";
+  ctx.textAlign = "right";
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const v = (max * i) / ticks;
+    const y = h - padB - v * yScale;
+    ctx.fillText(v.toFixed(2), padL - 6, y + 3);
+    ctx.strokeStyle = "#1c2530";
+    ctx.beginPath();
+    ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+  }
+
+  // Bars
+  const barW = Math.min(120, plotW / 4);
+  const gap = plotW / 3;
+  const x1 = padL + gap / 2 - barW / 2;
+  const x2 = padL + gap + gap / 2 - barW / 2;
+
+  // Available
+  const hAvail = L.H_avail_min * yScale;
+  ctx.fillStyle = "#3fb950";
+  ctx.fillRect(x1, h - padB - hAvail, barW, hAvail);
+  ctx.fillStyle = "#0d1117";
+  ctx.font = "bold 12px ui-monospace, monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(L.H_avail_min.toFixed(2), x1 + barW / 2, h - padB - hAvail + 14);
+
+  // Required stacked: hf + hm
+  let yCur = h - padB;
+  const hfh = L.final.hf * yScale;
+  ctx.fillStyle = "#58a6ff";
+  ctx.fillRect(x2, yCur - hfh, barW, hfh);
+  if (hfh > 14) {
+    ctx.fillStyle = "#0d1117";
+    ctx.fillText(L.final.hf.toFixed(3), x2 + barW / 2, yCur - hfh / 2 + 4);
+  }
+  yCur -= hfh;
+  const hmh = L.final.hm * yScale;
+  ctx.fillStyle = "#d29922";
+  ctx.fillRect(x2, yCur - hmh, barW, hmh);
+  if (hmh > 14) {
+    ctx.fillStyle = "#0d1117";
+    ctx.fillText(L.final.hm.toFixed(3), x2 + barW / 2, yCur - hmh / 2 + 4);
+  }
+
+  // Required total marker line
+  const reqY = h - padB - L.final.H_req * yScale;
+  ctx.strokeStyle = "#f85149";
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padL, reqY); ctx.lineTo(w - padR, reqY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#f85149";
+  ctx.textAlign = "left";
+  ctx.font = "11px ui-monospace, monospace";
+  ctx.fillText("H_req = " + L.final.H_req.toFixed(3) + " m", padL + 6, reqY - 4);
+
+  // X labels
+  ctx.fillStyle = "#e6edf3";
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Available (LAT)", x1 + barW / 2, h - padB + 18);
+  ctx.fillText("Required (hf + hm)", x2 + barW / 2, h - padB + 18);
+
+  // Y axis title
+  ctx.save();
+  ctx.translate(14, h / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = "#8b949e";
+  ctx.font = "11px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Head (m)", 0, 0);
+  ctx.restore();
+}
+
+function drawIteration() {
+  const c = $("iter-canvas");
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#0d1117";
+  ctx.fillRect(0, 0, w, h);
+
+  const L = LAST;
+  const tr = L.trace;
+
+  const padL = 60, padR = 60, padT = 20, padB = 36;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+
+  const Dmin = 0.30, Dmax = 1.5;
+  const Vmax = Math.max(...tr.map(t => t.V), 2.5);
+  const Mmax = Math.max(...tr.map(t => Math.max(t.margin, 0)), L.H_avail_min) * 1.1;
+  const Mmin = Math.min(...tr.map(t => t.margin));
+
+  ctx.strokeStyle = "#2a3441";
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB);
+  ctx.stroke();
+
+  function xOf(D) { return padL + (D - Dmin) / (Dmax - Dmin) * plotW; }
+  function yV(V) { return h - padB - (V / Vmax) * plotH; }
+  function yM(M) {
+    const span = Mmax - Math.min(Mmin, 0);
+    return h - padB - ((M - Math.min(Mmin, 0)) / span) * plotH;
+  }
+
+  // Velocity band 0.8..2.0 highlight
+  ctx.fillStyle = "rgba(63,185,80,0.06)";
+  ctx.fillRect(padL, yV(2.0), plotW, yV(0.8) - yV(2.0));
+
+  // X ticks
+  ctx.fillStyle = "#8b949e";
+  ctx.font = "11px ui-monospace, monospace";
+  ctx.textAlign = "center";
+  for (let D = 0.3; D <= 1.5001; D += 0.2) {
+    const x = xOf(D);
+    ctx.fillText(D.toFixed(1), x, h - padB + 16);
+    ctx.strokeStyle = "#1c2530";
+    ctx.beginPath();
+    ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke();
+  }
+
+  // Y left ticks (V)
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#58a6ff";
+  for (let v = 0; v <= Vmax; v += 0.5) {
+    const y = yV(v);
+    ctx.fillText(v.toFixed(1), padL - 6, y + 3);
+  }
+  // Y right ticks (margin)
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#3fb950";
+  const span = Mmax - Math.min(Mmin, 0);
+  const step = span / 4;
+  for (let i = 0; i <= 4; i++) {
+    const m = Math.min(Mmin, 0) + step * i;
+    const y = yM(m);
+    ctx.fillText(m.toFixed(2), w - padR + 6, y + 3);
+  }
+
+  // V curve
+  ctx.strokeStyle = "#58a6ff"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  tr.forEach((t, i) => {
+    const x = xOf(t.D), y = yV(t.V);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Margin curve
+  ctx.strokeStyle = "#3fb950"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  tr.forEach((t, i) => {
+    const x = xOf(t.D), y = yM(t.margin);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Zero margin line
+  ctx.strokeStyle = "#f85149"; ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padL, yM(0)); ctx.lineTo(w - padR, yM(0)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Selected D marker
+  const xs = xOf(L.chosen.D);
+  ctx.strokeStyle = "#d29922"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(xs, padT); ctx.lineTo(xs, h - padB); ctx.stroke();
+  ctx.fillStyle = "#d29922";
+  ctx.font = "11px ui-monospace, monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("D_iter = " + L.chosen.D.toFixed(2) + " m → DN " + L.DN, xs + 4, padT + 12);
+
+  // Axis labels
+  ctx.fillStyle = "#8b949e";
+  ctx.font = "11px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Pipe diameter D (m)", padL + plotW / 2, h - 6);
+  ctx.save();
+  ctx.translate(14, h / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = "#58a6ff";
+  ctx.fillText("V (m/s)", 0, 0);
+  ctx.restore();
+  ctx.save();
+  ctx.translate(w - 12, h / 2); ctx.rotate(Math.PI / 2);
+  ctx.fillStyle = "#3fb950";
+  ctx.fillText("Head margin (m)", 0, 0);
+  ctx.restore();
+}
+
+function drawSchematic() {
+  const c = $("schematic-canvas");
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#0d1117";
+  ctx.fillRect(0, 0, w, h);
+
+  const L = LAST;
+  // World y range
+  const yTop = Math.max(L.I.h_HAT_m + 1, 3);
+  const yBot = Math.min(L.z_invert - 1, L.I.z_seabed_m - 1, -7);
+  const padT = 24, padB = 30, padL = 30, padR = 30;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+
+  function Y(z) { return padT + (yTop - z) / (yTop - yBot) * plotH; }
+
+  // Sea water at HAT (light)
+  ctx.fillStyle = "rgba(88,166,255,0.10)";
+  ctx.fillRect(padL, Y(L.I.h_HAT_m), plotW, Y(yBot) - Y(L.I.h_HAT_m));
+  // Sea water at LAT (deeper)
+  ctx.fillStyle = "rgba(88,166,255,0.18)";
+  ctx.fillRect(padL, Y(L.I.h_LAT_m), plotW, Y(yBot) - Y(L.I.h_LAT_m));
+
+  // Seabed
+  ctx.fillStyle = "#5b4a32";
+  ctx.fillRect(padL, Y(L.I.z_seabed_m), plotW, Y(yBot) - Y(L.I.z_seabed_m));
+  ctx.strokeStyle = "#8a7050"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(padL, Y(L.I.z_seabed_m)); ctx.lineTo(padL + plotW, Y(L.I.z_seabed_m)); ctx.stroke();
+
+  // Pipe (from intake at left, to sump on right)
+  const pipeY1 = Y(L.z_invert);
+  const pipeY2 = Y(L.I.z_sump_m - 0.4);
+  const xIntake = padL + 80;
+  const xSumpL = padL + plotW - 160;
+  const pipeT = Math.max(8, (Y(L.z_invert) - Y(L.z_bellmouth_top)) * 0.6);
+  ctx.fillStyle = "#3a4a5a";
+  ctx.strokeStyle = "#79c0ff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(xIntake, pipeY1 - pipeT / 2);
+  ctx.lineTo(xSumpL, pipeY1 - pipeT / 2);
+  ctx.lineTo(xSumpL, pipeY2 - pipeT / 2);
+  ctx.lineTo(xSumpL + 8, pipeY2 - pipeT / 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(xIntake, pipeY1 + pipeT / 2);
+  ctx.lineTo(xSumpL, pipeY1 + pipeT / 2);
+  ctx.lineTo(xSumpL, pipeY2 + pipeT / 2);
+  ctx.lineTo(xSumpL + 8, pipeY2 + pipeT / 2);
+  ctx.stroke();
+
+  // Bellmouth
+  ctx.strokeStyle = "#79c0ff"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(xIntake, pipeY1 - pipeT / 2);
+  ctx.lineTo(xIntake - 24, Y(L.z_bellmouth_top) - 6);
+  ctx.moveTo(xIntake, pipeY1 + pipeT / 2);
+  ctx.lineTo(xIntake - 24, Y(L.z_invert) + 6);
+  ctx.stroke();
+
+  // Sump box
+  const sumpRight = padL + plotW - 30;
+  ctx.strokeStyle = "#e6edf3";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(xSumpL + 8, Y(L.I.z_sump_m), sumpRight - xSumpL - 8, Y(L.I.z_sump_m - L.sump_depth) - Y(L.I.z_sump_m));
+  ctx.fillStyle = "rgba(88,166,255,0.18)";
+  ctx.fillRect(xSumpL + 8, Y(L.I.z_sump_m), sumpRight - xSumpL - 8, Y(yBot) - Y(L.I.z_sump_m));
+
+  // Reference lines & labels
+  function dashLine(z, color, label) {
+    ctx.strokeStyle = color;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(padL, Y(z)); ctx.lineTo(padL + plotW, Y(z));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color;
+    ctx.font = "11px ui-monospace, monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(label, padL + plotW - 150, Y(z) - 3);
+  }
+  dashLine(L.I.h_HAT_m, "#58a6ff", `HAT  ${L.I.h_HAT_m.toFixed(2)} m`);
+  dashLine(L.I.h_LAT_m, "#79c0ff", `LAT  ${L.I.h_LAT_m.toFixed(2)} m`);
+  dashLine(L.I.z_seabed_m, "#8a7050", `Seabed  ${L.I.z_seabed_m.toFixed(2)} m`);
+  dashLine(L.I.z_sump_m, "#3fb950", `Sump WL  ${L.I.z_sump_m.toFixed(2)} m`);
+  dashLine(L.z_invert, "#d29922", `Invert  ${L.z_invert.toFixed(2)} m`);
+
+  // Title
+  ctx.fillStyle = "#e6edf3";
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(`L = ${L.I.L_m} m, DN${L.DN}, V = ${L.final.V.toFixed(2)} m/s`, padL, 16);
+  ctx.textAlign = "right";
+  ctx.fillText(`Submergence above bell @ LAT = ${L.submergence_actual.toFixed(2)} m  (S_min = ${L.S_min.toFixed(2)} m)`,
+    padL + plotW, h - 8);
+}
+
+// ---------- Init ----------
+function loadDefaults() {
+  for (const k of Object.keys(DEFAULTS)) setInput(k, DEFAULTS[k]);
+}
+function resetDefaults() { loadDefaults(); calc(); }
+
+function bindInputs() {
+  for (const k of Object.keys(DEFAULTS)) {
+    $(k).addEventListener("input", calc);
+  }
+  $("emergency").addEventListener("change", calc);
+}
+function bindTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      $("panel-" + btn.dataset.tab).classList.add("active");
+      // Show all panels for print mode handled by CSS; force redraw on tab switch:
+      requestAnimationFrame(render);
+    });
+  });
+}
+
+window.addEventListener("resize", () => requestAnimationFrame(render));
+window.addEventListener("beforeprint", () => {
+  // Make all panels visible for printing
+  document.querySelectorAll(".panel").forEach(p => p.classList.add("active"));
+  setTimeout(render, 50);
+});
+window.addEventListener("afterprint", () => {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  const cur = document.querySelector(".tab-btn.active");
+  if (cur) $("panel-" + cur.dataset.tab).classList.add("active");
+  render();
+});
+
+loadDefaults();
+bindInputs();
+bindTabs();
+calc();
+</script>
+</body>
+</html>
