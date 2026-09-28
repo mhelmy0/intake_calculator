@@ -1,0 +1,16 @@
+/* Tools module (Industry styling) */
+.mod-tools[data-tab="velocity"] .tl-velocity-view { display: flex; justify-content: center; align-items: flex-start; padding: 6px 10px 20px; overflow-y: auto; }
+.mod-tools[data-tab="fluid"] .tl-fluid-view { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; gap: 16px; }
+.tl-fluid-view .tl-fl-props   { grid-column: 1; grid-row: 1; }
+.tl-fluid-view .tl-fl-presets { grid-column: 2; grid-row: 1; }
+.tl-fluid-view .tl-fl-steps   { grid-column: 1 / span 2; grid-row: 2; }
+.tl-fluid-view .tl-fl-props .card-body, .tl-fluid-view .tl-fl-presets .card-body { flex: 0 0 auto; }
+.mod-tools .vc-card { width: 100%; max-width: 640px; padding: 18px 20px 20px; }
+.mod-tools .vc-card h2 { margin: 0 0 12px; font-size: 22px; }
+.mod-tools .vc-card h3 { font-family: var(--font-body); font-size: 11px; color: var(--color-neutral-700); text-transform: uppercase; letter-spacing: 0.08em; margin: 14px 0 6px; font-weight: 500; }
+.mod-tools .vc-output-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); border: 1px solid var(--color-divider); }
+.mod-tools .vc-status-line { padding: 8px 12px; font-weight: 600; font-size: 13px; text-align: center; margin: 10px 0; border: 1px solid var(--color-divider); }
+.mod-tools .vc-status-line.pass { background: var(--color-accent-100); color: var(--color-accent-800); border-color: var(--color-accent-300); }
+.mod-tools .vc-status-line.warn { border-color: var(--color-accent); color: var(--color-accent-800); }
+.mod-tools .vc-status-line.fail { background: var(--color-accent-900); color: var(--color-bg); border-color: var(--color-accent-900); }
+@media print { .mod-tools .view { display: block !important; } }

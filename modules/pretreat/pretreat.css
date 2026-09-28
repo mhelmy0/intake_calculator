@@ -1,0 +1,14 @@
+/* ============================================================
+   Pretreatment (Intake page layout reused; see intake.css / bom.css)
+   ============================================================ */
+.pt-wide .in-left { flex-basis: 100%; }
+.pt-wide .in-right { position: static; max-width: none; }
+tr.pt-off td { opacity: 0.55; }
+.pt-pick-row { display: flex; gap: 8px; align-items: center; }
+.pt-pick-row select { flex: 1; min-width: 0; }
+.pt-picker { max-width: 760px; }
+.pt-chem .input { min-width: 0; }
+.pt-chem td:nth-child(2) .input { width: 170px; }
+.pt-chem td:nth-child(3) .input, .pt-chem td:nth-child(12) .input { width: 160px; }
+.pt-chem .w-s { width: 72px; }
+@media print { .pt-pick-row .btn { display: none; } }

@@ -1,0 +1,16 @@
+/* ============================================================
+   Bill of materials + Supports & buoyancy (Intake page layout reused)
+   ============================================================ */
+.mod-scroll { display: block; overflow-y: auto; }
+.bm-srcs { display: flex; flex-direction: column; gap: 10px; }
+.bm-src { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--color-divider); cursor: pointer; }
+.bm-src input { margin-top: 3px; accent-color: var(--color-accent); }
+.bm-src > span { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.bm-src .dim { font-size: 12px; }
+.bm-open { font-size: 12px; color: var(--color-accent-700); }
+.link-btn { border: 0; background: transparent; padding: 0; color: var(--color-accent-800); cursor: pointer; font: inherit; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+.lg.short { height: 10px; width: 12px; background: var(--color-accent-900); }
+@media print {
+  .mod-scroll { overflow: visible; }
+  .bm-open, .toolbar-row, .in-sec .icon-btn { display: none; }
+}

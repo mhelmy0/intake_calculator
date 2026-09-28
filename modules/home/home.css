@@ -1,0 +1,10 @@
+/* Home module (placeholder dashboard) */
+.mod-home { display: block; overflow-y: auto; }
+.home { padding: 4px 0 40px; max-width: 1400px; }
+.home-lead { color: var(--color-neutral-800); max-width: 640px; }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; margin-top: 18px; }
+.home-card { padding: 16px 18px 18px; }
+.home-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--color-accent-700); }
+.home-card-head h2 { font-size: 20px; margin: 0; color: var(--color-text); }
+.home-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.home-soon { margin-top: 10px; font-size: 12px; }

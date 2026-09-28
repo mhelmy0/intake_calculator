@@ -1,0 +1,5 @@
+﻿code,name,category,basis,n_LD,K,Kv,K1,Ki,Kd,velocity_ref,dn_min_mm,dn_max_mm,bom,connection,status,source,notes
+MY-ELB90,My 90 deg elbow (Crane style),elbow,n,30,,,,,,segment,,,yes,butt_fusion,verified,Consultant XYZ table 4.2,
+MY-BFV,My butterfly valve (fixed K),valve,K,,0.35,,,,,segment,,,yes,flanged,verified,Consultant XYZ table 4.3,
+MY-PRV,My PRV (manufacturer Kv),valve,kv,,,400,,,,segment,,,yes,flanged,verified,Vendor datasheet,Kv in m3/h
+MY-ELB90-3K,Threaded 90 deg elbow (Darby 3-K),elbow,3k,,,,800,0.14,4,segment,,,yes,threaded,verified,Darby 3-K,
