@@ -1,0 +1,485 @@
+So I have this problem here: I need to calculate the buoyancy force for a 1-inch HDPE pipe with an outer diameter of 32mm, and it's made of PE100 SDR11. The length of the pipe is 500 meters. Alright, let's start by understanding what buoyancy force is. Buoyancy force is the upward force exerted by a fluid on an object immersed in it. For a pipe, especially one that's submerged in water, this force would countered the weight of the pipe, affecting its stability or flotation.
+
+First, I need to make sure I have all the dimensions in consistent units. The outer diameter is given as 32mm, but since the pipe is specified as 1-inch, I should confirm if this is accurate. Wait, actually, 1-inch pipes typically have an outer diameter around 33.4mm for standard dimensions, but here it's given as 32mm, so I'll use the provided value of 32mm.
+
+Now, the pipe is made of PE100 SDR11. SDR stands for Standard Dimension Ratio, which is the ratio of the outer diameter to the wall thickness. For SDR11, that means the wall thickness is the outer diameter divided by 11. So, let's calculate the wall thickness.
+
+Outer diameter, D = 32mm
+
+Wall thickness, t = D / SDR = 32mm / 11 ≈ 2.909mm
+
+Wait, actually, for pipes, the SDR is defined as D/t, so t = D / SDR. Yes, so t = 32 / 11 ≈ 2.909mm.
+
+But to be precise, let's keep it as 32/11 mm for now.
+
+Next, since it's a hollow pipe, I need to find the volume of the material and also the volume it displaces when submerged.
+
+Wait, actually, for buoyancy force, according to Archimedes' principle, the buoyancy force is equal to the weight of the fluid displaced by the object. So, for a submerged pipe, the buoyancy force would be equal to the weight of the water displaced by the volume of the pipe.
+
+But wait, is the pipe filled with air or water? The problem doesn't specify. In marine applications, pipes can be either empty or filled with fluid. However, since it's a buoyancy force calculation for the pipe itself, I think we typically consider the pipe as is, meaning if it's sealed, it might be filled with air, or if it's open, it could be filled with water. But in standard buoyancy calculations for pipes, especially for underwater pipelines, we often consider the pipe as being filled with air or the fluid it's designed to carry. Wait, actually, for HDPE pipes used in marine applications, they might be used for dredging or other purposes, but the problem doesn't specify.
+
+Looking back at the question: "calculate the buoyancy force for 1 inch HDPE pipe". It probably implies the buoyancy force when the pipe is submerged in water, and typically for such calculations, we consider the pipe as empty, filled with air, so the buoyancy force would be based on the external volume.
+
+Wait, actually, to clarify: the buoyancy force depends on the volume of water displaced, which is the external volume of the pipe, regardless of whether it's filled with air or water. Wait, no, if the pipe is filled with water and submerged, then the buoyancy force would still be based on the external volume, but the net buoyancy would consider the weight of the pipe material plus the weight of the water inside.
+
+Wait, perhaps I need to be careful. Let's think step by step.
+
+First, the buoyancy force, FB, is equal to the weight of the water displaced by the submerged part of the object. For a fully submerged pipe, that would be the volume of the external dimensions of the pipe multiplied by the density of water and gravity.
+
+So, FB = ρ_water * g * V_displaced
+
+Where V_displaced is the volume of the pipe based on its external dimensions.
+
+For a cylindrical pipe, the external volume V_external = π * (D/2)^2 * L, where D is the outer diameter and L is the length.
+
+Wait, actually, for a pipe, since it's hollow, but when submerged, the water is displaced by the outer surface, so yes, the displaced volume is the volume enclosed by the outer diameter.
+
+Wait, more precisely, for a hollow pipe submerged in water, if the pipe is sealed and filled with air, then the displaced volume is indeed the volume based on the outer diameter. If the pipe is open and filled with water, it's still the same, because the water inside is part of the surrounding water, but actually, for buoyancy calculations, the buoyancy force is always based on the external volume.
+
+Wait, to confirm: Archimedes' principle states that the buoyancy force is equal to the weight of the fluid displaced by the object. The object displaces fluid based on its external volume, regardless of what's inside. So, whether the pipe is filled with air or water, the buoyancy force is the same, as long as the external volume is the same.
+
+However, the net buoyancy, or the effective force, would depend on the weight of the pipe. If the pipe is filled with air, its total weight is less, so the net buoyancy force (buoyancy minus weight) would be different compared to if it's filled with water.
+
+But the question specifically asks for "the buoyancy force", not the net buoyancy. So, I believe it's asking for FB = ρ_water * g * V_external.
+
+Wait, but let's check the context. The problem says "calculate the buoyancy force for 1 inch HDPE pipe", and in marine design, often we are interested in the buoyancy force to determine if the pipe will float or sink, but technically, the buoyancy force itself is just the upward force due to displaced water.
+
+Moreover, in some contexts, for pipelines, especially underwater, the buoyancy force might be calculated based on the effective volume, but I think for standard calculations, it's the external volume.
+
+Wait, actually, upon second thought, for a submerged pipe, if it's completely submerged, the buoyancy force is indeed based on the external volume. If it's floating, then it's based on the submerged volume, but since the problem doesn't specify, and it's a marine designer calculating buoyancy for a pipe, likely it's for a submerged scenario.
+
+But wait, the problem mentions "1 inch HDPE pipe with outer diameter of 32mm", and "length of the pipe is 500m", but it doesn't specify if it's submerged or floating. However, since it's asking for the buoyancy force, and in marine contexts, pipes are often submerged, I think it's safe to assume it's fully submerged.
+
+Alternatively, perhaps I should calculate the buoyancy force per unit length or something, but the question seems to imply the total buoyancy force for the entire pipe.
+
+Wait, another point: for pipes, especially in marine applications, sometimes they are designed to float or to be submerged, and the buoyancy calculation might involve whether they are filled with air or not. But since the problem doesn't specify, maybe I should consider the standard approach.
+
+Wait, let's look back at the question: "calculate the buoyancy force for 1 inch HDPE pipe with outer diameter of 32mm and PE100 SDR11, knowing the length of the pipe is 500m".
+
+It seems straightforward: calculate the buoyancy force, which is FB = ρ_water * g * V_external, where V_external = π * (D/2)^2 * L.
+
+But wait, is that correct? Actually, for a pipe, if it's submerging in water, the displaced volume is the volume of the cylinder with diameter D, so yes.
+
+Alternatively, sometimes in pipeline design, especially for submerged pipelines, the buoyancy force is calculated per unit length, but since the length is given, I can calculate the total.
+
+But let's confirm the units. First, I need to make sure all units are consistent. The diameter is 32mm, length is 500m. It's better to convert everything to meters.
+
+So, D = 32mm = 0.032m
+
+L = 500m
+
+Then, the external volume V_external = π * (D/2)^2 * L = π * (0.016)^2 * 500 m³
+
+Let me calculate that.
+
+First, (0.016)^2 = 0.000256
+
+Then, π * 0.000256 ≈ 3.1416 * 0.000256 ≈ 0.000804247
+
+Then, V_external ≈ 0.000804247 * 500 ≈ 0.402123 m³
+
+Now, the density of water, ρ_water, typically for seawater, it's around 1025 kg/m³, but since the problem doesn't specify, maybe I should use 1000 kg/m³ for fresh water, but in marine design, it's often seawater.
+
+Wait, the problem says "marine designer", so likely it's for seawater. But actually, in many calculations, unless specified, we might use 1000 kg/m³, but to be accurate, I should use the appropriate density.
+
+Wait, perhaps I can check if the problem implies fresh water or seawater. Since it's a marine designer, probably seawater, but let's see if it affects the calculation significantly. For now, I'll proceed with ρ_water = 1000 kg/m³, and if needed, I can adjust.
+
+So, FB = ρ_water * g * V_external, where g = 9.81 m/s²
+
+Thus, FB = 1000 * 9.81 * 0.402123 ≈ 1000 * 9.81 * 0.402123
+
+First, 9.81 * 0.402123 ≈ 3.9448
+
+Then, 1000 * 3.9448 ≈ 3944.8 N
+
+So, the buoyancy force is approximately 3945 N.
+
+Wait, but this seems too straightforward. Is there more to it? Wait, perhaps I need to consider if the pipe is filled with air or water. But as I thought earlier, the buoyancy force itself is based on the external volume, so it should be correct.
+
+Alternatively, maybe the problem expects me to calculate the net buoyancy, considering the weight of the pipe.
+
+But the question specifically says "calculate the buoyancy force", not the net force.
+
+Moreover, in some contexts, for pipes, the buoyancy force might be interpreted differently, but I think the standard definition applies.
+
+Wait, another thought: for HDPE pipes, since HDPE has a density less than water, if the pipe is empty, it might float, but since the length is 500m, and it's a marine application, perhaps it's intended to be submerged, but still, the buoyancy force is the same.
+
+Wait, actually, to confirm, let's think about what the buoyancy force represents. It's the force that the water exerts on the pipe, which is equal to the weight of the displaced water.
+
+So, yes, FB = ρ_water * g * V_external.
+
+Alternatively, perhaps the problem wants the buoyancy force per unit length, but since the total length is given, and it says "for 1 inch HDPE pipe with length 500m", likely it's the total buoyancy force.
+
+But wait, let's check if the calculation is correct.
+
+Wait, earlier I calculated V_external = π * (0.016)^2 * 500
+
+But actually, let's compute it more accurately.
+
+D = 32mm = 0.032m, so radius r = 0.016m
+
+Then, cross-sectional area A = π r^2 = π * (0.016)^2 = π * 0.000256 ≈ 0.000804247 m²
+
+Then, volume V = A * L = 0.000804247 * 500 ≈ 0.402123 m³
+
+Yes, as before.
+
+Then, assuming ρ_water = 1000 kg/m³, g = 9.81 m/s²,
+
+FB = 1000 * 9.81 * 0.402123 ≈ 3944.8 N
+
+But perhaps I should express it in kN or something, but since it's a force, N is fine.
+
+Alternatively, maybe the problem expects me to consider the pipe's wall thickness or something, but for buoyancy force, it's the external volume that matters.
+
+Wait, unless the pipe is not fully submerged, but since it's a marine designer, and for a pipe, if it's laid on the seabed or something, but the problem just says "calculate the buoyancy force", so I think it's for the fully submerged case.
+
+Another point: the pipe is specified as PE100 SDR11, which gives me the wall thickness, but for the buoyancy force calculation, as long as I have the outer diameter, that's sufficient.
+
+Wait, actually, the wall thickness would be important if I were to calculate the weight of the pipe, but for buoyancy force, it's not directly needed.
+
+So, I think my calculation is correct.
+
+But let's double-check the units. Diameter is 32mm, which is 0.032m, length is 500m, so volume is π*(0.016)^2*500 m³, yes.
+
+Alternatively, perhaps I can calculate it in mm to avoid errors.
+
+For example, D = 32mm, L = 500,000 mm, then V = π*(16)^2*500,000 mm³
+
+But then I need to convert to m³, since 1 m³ = 10^9 mm³, so V = π256500,000 / 10^9 m³
+
+First, π256 ≈ 804.247, then 804.247500,000 = 402,123,500 mm³
+
+Then, V = 402,123,500 / 1,000,000,000 = 0.4021235 m³, same as before.
+
+So, yes.
+
+Therefore, FB = 1000 * 9.81 * 0.4021235 ≈ 3944.8 N
+
+But maybe I should use a more precise value for g, or for π, but I think this is sufficient.
+
+Alternatively, perhaps the problem expects me to use the exact fraction.
+
+Wait, actually, since D = 32mm = 32/1000 m = 0.032m, and L = 500m, so r = 0.016m, then V = π*(0.016)^2*500
+
+But 0.016 = 16/1000 = 2/125, but maybe it's easier to keep it in decimals.
+
+Alternatively, let's calculate it more precisely.
+
+Let me compute V exactly.
+
+First, D = 32mm = 3210^{-3} m, so r = 1610^{-3} m
+
+Then, V = π r^2 L = π (1610^{-3})^2 * 500 = π * 25610^{-6} * 500 = π * 256*500 * 10^{-6} = π * 128000 * 10^{-6} = π * 0.128 m³
+
+Wait, actually, 256500 = 128,000, and 128,00010^{-6} = 0.128, so V = π * 0.128 m³
+
+Then, using π ≈ 3.1415926535, V ≈ 3.1415926535 * 0.128 ≈ 0.4021235 m³, as before.
+
+Then, FB = 1000 * 9.81 * 0.4021235 ≈ 1000 * 9.81 * 0.4021235
+
+First, 9.81 * 0.4021235 ≈ 3.944829535
+
+Then, 1000 * 3.944829535 ≈ 3944.829535 N
+
+So, approximately 3945 N.
+
+But perhaps I should consider the density of seawater. Since it's a marine designer, maybe use ρ_water = 1025 kg/m³.
+
+Let me check.
+
+If ρ_water = 1025 kg/m³, then FB = 1025 * 9.81 * 0.4021235 ≈ 1025 * 9.81 * 0.4021235
+
+First, 1025 * 9.81 ≈ 10055.25
+
+Then, 10055.25 * 0.4021235 ≈ 4043.9 N
+
+So, about 4044 N.
+
+But since the problem didn't specify, and in many textbooks, they use 1000 kg/m³, but to be precise, perhaps I should use 1025 kg/m³.
+
+Alternatively, maybe the problem expects me to use 1000 kg/m³.
+
+Wait, another idea: perhaps the pipe is in fresh water, but since it's marine, likely seawater.
+
+But let's see if there's more to the problem.
+
+Wait, actually, upon re-reading the question, it says "calculate the bouncy force", but I think it's a typo, and it means "buoyancy force".
+
+Also, it specifies the pipe as PE100 SDR11, which gives the wall thickness, but as I said, for buoyancy force, it's not necessary unless I need to calculate the weight.
+
+Wait, maybe the problem is to calculate the net buoyancy force, meaning FB - weight of the pipe.
+
+But the question says "calculate the buoyancy force", so I think it's just FB.
+
+Alternatively, perhaps in the context of marine design, they often calculate the buoyant force per unit length or something, but here, since the length is given, it's probably the total.
+
+Wait, another thought: maybe the pipe is not fully submerged, but for a pipe in water, if it's horizontal, it might float with part of it above water, but since the density of HDPE is less than water, an empty pipe would float.
+
+Wait, let's check the density of HDPE. Typically, HDPE has a density around 950 kg/m³, less than water, so an empty HDPE pipe would float with part of it above water.
+
+In that case, the buoyancy force would equal the weight of the pipe, since it's in equilibrium.
+
+So, perhaps the problem expects me to calculate the buoyancy force when the pipe is floating, which would be equal to the weight of the pipe.
+
+But that seems inconsistent with the wording "calculate the buoyancy force", as in standard terminology, buoyancy force is the force due to displaced fluid, not necessarily equal to the weight unless it's floating.
+
+Moreover, if it's floating, I would need to calculate the submerged volume, which requires knowing the weight of the pipe.
+
+So, perhaps that's what the problem is aiming for.
+
+Alternatively, maybe for marine pipelines, they are often weighted to stay submerged, but since the problem doesn't specify, it's ambiguous.
+
+Wait, let's see: the pipe is specified with SDR11, which gives the wall thickness, so perhaps I need to calculate the weight of the pipe.
+
+Let me try to calculate the weight of the pipe.
+
+First, the pipe is made of HDPE, density ρ_HDPE ≈ 950 kg/m³.
+
+Then, the volume of the material V_material = π*(R^2 - r^2)*L, where R is the outer radius, r is the inner radius.
+
+Given that t = D / SDR = 32mm / 11 ≈ 2.909mm, so inner diameter d = D - 2t = 32 - 2*2.909 ≈ 32 - 5.818 ≈ 26.182mm
+
+So, inner radius r = 26.182 / 2 ≈ 13.091mm = 0.013091m
+
+Outer radius R = 16mm = 0.016m
+
+Then, V_material = π*(R^2 - r^2)L = π(0.016^2 - 0.013091^2)*500
+
+First, calculate 0.016^2 = 0.000256
+
+0.013091^2 ≈ 0.000171375
+
+So, R^2 - r^2 ≈ 0.000256 - 0.000171375 ≈ 0.000084625
+
+Then, V_material ≈ π0.000084625500 ≈ 3.14160.000084625500
+
+First, 3.1416*0.000084625 ≈ 0.0002658
+
+Then, 0.0002658*500 ≈ 0.1329 m³
+
+Then, mass of pipe m = ρ_HDPE * V_material ≈ 950 * 0.1329 ≈ 126.255 kg
+
+Then, weight W = m*g ≈ 126.255 * 9.81 ≈ 1238.56 N
+
+Now, if the pipe is floating, the buoyancy force FB = W = 1238.56 N
+
+But earlier, if it were fully submerged, FB = 3945 N, which is much larger than the weight, so indeed, the pipe would float, and the actual buoyancy force when floating would be equal to the weight, 1238.56 N.
+
+However, this seems inconsistent with the initial calculation.
+
+Wait, alternatively, perhaps the problem is to calculate the buoyancy force when the pipe is fully submerged, as in some design scenarios, pipes are forced to be submerged.
+
+But the question is ambiguous.
+
+Wait, another possibility: in some contexts, for underwater pipelines, the "buoyancy force" might refer to the net upward force, but typically, it's the gross buoyancy force.
+
+Moreover, in the problem statement, it says "calculate the bouncy force", which is likely a typo for "buoyancy force", and in standard usage, it's the force due to displaced fluid.
+
+But let's see if there's a way to confirm.
+
+Wait, perhaps I can look at the units or the expected answer.
+
+Alternatively, maybe the problem intends for me to calculate the buoyancy force per unit length.
+
+For example, in some designs, they calculate FB per meter.
+
+Let's try that.
+
+For a pipe, the buoyancy force per unit length FB/L = ρ_water * g * A_external, where A_external = π*(D/2)^2
+
+So, A_external = π*(0.016)^2 ≈ 0.000804247 m²
+
+Then, FB/L = 1000 * 9.81 * 0.000804247 ≈ 7.88967 N/m
+
+Then, for L = 500m, total FB = 7.88967 * 500 ≈ 3944.835 N, same as before.
+
+But again, this is for fully submerged.
+
+Alternatively, if it's floating, the buoyancy force would be equal to the weight, which is approximately 1238.56 N.
+
+But since the problem gives the length and asks for the buoyancy force, and doesn't specify if it's floating or submerged, it's tricky.
+
+Wait, perhaps in the context of marine design, for pipes, they often calculate the buoyancy force assuming it's submerged, as in calculating the lifting force or something.
+
+Alternatively, maybe the problem is to calculate the buoyancy force for the pipe when it's empty and submerged, which would be the value I calculated first.
+
+But let's see if there's another interpretation.
+
+Wait, another idea: perhaps the pipe is filled with water, and I need to calculate the buoyancy force.
+
+But even if it's filled with water, the buoyancy force is still based on the external volume, so FB would be the same.
+
+However, the net force would be FB - (weight of pipe + weight of water inside).
+
+But again, the question asks for "the buoyancy force", not the net force.
+
+So, I think the most straightforward answer is FB = ρ_water * g * V_external.
+
+But to be thorough, maybe I can provide both.
+
+Alternatively, perhaps the problem expects me to use the specific gravity or something related to PE100.
+
+Wait, PE100 is a grade of HDPE, with a minimum required strength of 10mpa, but for density, it's still around 950 kg/m³.
+
+So, I think my calculation is correct.
+
+Wait, let's check the outer diameter. The problem says "1 inch HDPE pipe with outer diameter of 32mm". Wait, is 32mm exactly 1 inch? Actually, 1 inch = 25.4mm, so a 1-inch pipe typically has an outer diameter larger than 1 inch due to the wall thickness, but for HDPE pipes, the nominal size might correspond to the outer diameter.
+
+Wait, actually, for HDPE pipes, the nominal diameter often refers to the outer diameter, but for a 1-inch pipe, it's usually around 33.4mm for some standards, but since the problem specifies "outer diameter of 32mm", I'll use that.
+
+So, I think my initial calculation is fine.
+
+Therefore, the buoyancy force is approximately 3945 N if using ρ_water = 1000 kg/m³, or 4044 N if using ρ_water = 1025 kg/m³.
+
+But since the problem didn't specify, perhaps it's acceptable to use 1000 kg/m³.
+
+Alternatively, maybe in marine design, they use a standard density, but I think for precision, it's better to use 1025 kg/m³.
+
+Wait, let's make a decision. Since the problem is about a marine designer, and typically in marine environments, it's seawater, I'll use ρ_water = 1025 kg/m³.
+
+So, let's calculate more accurately.
+
+First, V_external = π*(0.016)^2500 = π0.000256500 = π0.128 m³
+
+Then, FB = 1025 * 9.81 * π * 0.128
+
+Let's compute step by step.
+
+First, π * 0.128 ≈ 3.1415926535 * 0.128 ≈ 0.4021235
+
+Then, 1025 * 0.4021235 ≈ 1025 * 0.4021235
+
+Calculate 10000.4021235 = 402.1235, 250.4021235 ≈ 10.0530875, so total ≈ 412.1765875
+
+Then, FB = 9.81 * 412.1765875 ≈ 9.81 * 412.1765875
+
+Calculate 10412.1765875 = 4121.765875, so 9.81412.1765875 ≈ 4121.765875 - 0.19*412.1765875 ≈ 4121.765875 - 78.31355225 ≈ 4043.452323 N
+
+So, approximately 4043 N.
+
+But since it's a calculation, perhaps I can leave it as an exact expression.
+
+Alternatively, maybe the problem expects the answer in a specific unit, like kN.
+
+4043 N = 4.043 kN, but since it's a small number, perhaps N is fine.
+
+Wait, actually, for such lengths, maybe they expect the force in kN or MN, but 4043 N is 4.043 kN, which is reasonable.
+
+But let's see if there's a mistake in assuming the density.
+
+Wait, upon second thought, perhaps in some standards, they use 1000 kg/m³ for calculations, but I think for accuracy, 1025 kg/m³ is better.
+
+Alternatively, maybe the problem is set in fresh water, but since it's marine, likely seawater.
+
+Wait, another way: perhaps I can calculate the buoyancy force using the formula for pipes.
+
+In fact, for pipes, sometimes the buoyancy force is calculated as the weight of water displaced by the external volume, which is what I did.
+
+So, I think it's correct.
+
+Therefore, the buoyancy force is approximately 4043 N.
+
+But to provide a final answer, perhaps I should box it.
+
+Wait, let's confirm if there's any other aspect I'm missing.
+
+Oh, one thing: the problem mentions "PE100 SDR11", and for SDR11, the wall thickness is D/11, which I used to calculate the inner diameter, but since it's not needed for the buoyancy force, it's probably just additional information.
+
+Alternatively, maybe the problem is to calculate the buoyancy when the pipe is filled with water or something, but since it's not specified, I think the standard buoyancy force is what's required.
+
+So, I'll conclude that the buoyancy force is 4043 N.
+
+Wait, but earlier I calculated 3945 N with ρ=1000, and 4043 N with ρ=1025, but perhaps I can use a more precise value.
+
+Actually, let's calculate exactly.
+
+First, let's use ρ_water = 1025 kg/m³, g = 9.81 m/s², D = 0.032 m, L = 500 m.
+
+Then, V_external = π*(D/2)^2L = π(0.016)^2500 = π0.000256*500
+
+But 0.000256500 = 0.128, so V_external = π0.128 m³
+
+Then, FB = 1025 * 9.81 * π * 0.128
+
+Let me calculate numerically.
+
+First, π ≈ 3.141592653589793
+
+So, π * 0.128 = 0.4021235496594934
+
+Then, 1025 * 0.4021235496594934 = 412.17658840148086
+
+Then, 9.81 * 412.17658840148086 = 4043.452333518827 N
+
+So, to a reasonable precision, FB = 4043 N
+
+Alternatively, perhaps I can express it as 4.043 kN.
+
+But since the problem didn't specify the units, and in SI units, N is acceptable.
+
+Wait, actually, in engineering contexts, often forces are expressed in kN, but for this magnitude, N is fine.
+
+Moreover, since the length is 500m, and the diameter is small, the force is not too large.
+
+So, I think 4043 N is a suitable answer.
+
+Wait, but let's check if the calculation is correct.
+
+Alternatively, maybe I can calculate per unit length first.
+
+For example, buoyancy force per meter: FB_per_m = ρ_water * g * π*(D/2)^2 = 1025 * 9.81 * π*(0.016)^2
+
+First, π*(0.016)^2 = π*0.000256 ≈ 0.0008042477193
+
+Then, 1025 * 0.0008042477193 ≈ 0.8243539123
+
+Then, 9.81 * 0.8243539123 ≈ 8.086909682
+
+So, FB_per_m ≈ 8.087 N/m
+
+Then, for L = 500m, total FB = 8.087 * 500 ≈ 4043.5 N, same as before.
+
+So, yes.
+
+Therefore, the buoyancy force for the 500m pipe is 4043 N.
+
+Wait, but to be precise, since the diameter is given as 32mm, which is exact, and length is 500m, I can leave it in terms of exact values.
+
+For example, D = 32/1000 m = 0.032 m, but since 32mm = 0.032m exactly, and L = 500m, so V_external = π*(0.016)^2500 = π(0.000256)500 = π0.128 m³
+
+Then, FB = 1025 * 9.81 * π * 0.128 N
+
+But I think providing the numerical value is fine.
+
+Alternatively, perhaps the problem expects the answer in a different form, but I believe 4043 N is acceptable.
+
+So, I'll box that as the final answer.
+
+Wait, one last thing: maybe I need to consider if the pipe is sealed or not, but since for buoyancy force, it's the external volume that matters, and the problem doesn't specify, I think it's okay.
+
+Therefore, the buoyancy force is 4043 N.
+
+But let's make sure about the density. Actually, upon checking, the density of seawater can vary, but 1025 kg/m³ is a common value used in calculations. Some sources use 1027 kg/m³, but the difference is small.
+
+Alternatively, perhaps in some standards, they use a specific value, but I think 1025 kg/m³ is reasonable.
+
+So, I'll proceed with that.
+
+Thus, the final answer is 4043 N.
+
+Wait, but to be more precise, since the calculation gave 4043.45 N, I can round it to 4043 N or keep it as approximately 4043 N.
+
+Alternatively, maybe the problem expects the answer in terms of fresh water, but I think for a marine designer, seawater is more appropriate.
+
+Wait, another idea: perhaps the pipe is used in a different fluid, but since it's marine, it's likely water.
+
+So, I think it's fine.
+
+Therefore, the buoyancy force is 4043 N.
+
+Final Answer
+
+4043
+4043
+​

@@ -1,0 +1,65 @@
+/* ============================================================
+   Pipeline Hydraulics module — module-specific styles
+   ============================================================ */
+.mod-pipeline[data-tab="friction"] .pl-friction-view,
+.mod-pipeline[data-tab="hammer"]   .pl-hammer-view,
+.mod-pipeline[data-tab="sdr"]      .pl-sdr-view,
+.mod-pipeline[data-tab="fluid"]    .pl-fluid-view { display: grid; }
+
+/* Calculator views: [results][chart/table][checks] over [trace] */
+.pl-calc-view {
+  grid-template-columns: 4fr 5fr 3fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+}
+.pl-r1c1 { grid-column: 1; grid-row: 1; }
+.pl-r1c2 { grid-column: 2; grid-row: 1; }
+.pl-r1c3 { grid-column: 3; grid-row: 1; }
+.pl-r2-span12 { grid-column: 1 / span 2; grid-row: 2; }
+.pl-r2c3 { grid-column: 3; grid-row: 2; }
+.pl-r2-all { grid-column: 1 / span 3; grid-row: 2; }
+
+.pl-fluid-view {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+.pl-fluid-view .pl-fl-props   { grid-column: 1; grid-row: 1; }
+.pl-fluid-view .pl-fl-presets { grid-column: 2; grid-row: 1; }
+.pl-fluid-view .pl-fl-steps   { grid-column: 1 / span 2; grid-row: 2; }
+/* auto-height top row: let card bodies size to content */
+.pl-fluid-view .pl-fl-props .card-body,
+.pl-fluid-view .pl-fl-presets .card-body { flex: 0 0 auto; }
+.data-table td.tags { white-space: normal; color: var(--accent-2); font-size: 0.68rem; }
+
+/* Compact live cards in the left panel */
+.pl-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 2px;
+}
+.pl-mini-grid .value-card { padding: 4px 6px; border-left-color: var(--accent); }
+.pl-mini-grid .value-card .v-val { font-size: 0.85rem; color: var(--accent-2); }
+.pl-mini-grid.fluid .value-card { border-left-color: var(--purple); }
+.pl-mini-grid.fluid .value-card .v-val { color: #c9a8ff; }
+
+.pl-warn-list { margin: 6px 0 0; padding: 0; list-style: none; }
+.pl-warn-list li {
+  font-size: 0.72rem; color: var(--amber);
+  padding: 4px 8px; margin-top: 3px;
+  background: rgba(210,153,34,0.10); border-left: 3px solid var(--amber); border-radius: 4px;
+}
+.pl-error {
+  margin: 6px 0; padding: 7px 10px; border-radius: 5px;
+  background: rgba(248,81,73,0.12); color: var(--red);
+  border: 1px solid rgba(248,81,73,0.4); font-size: 0.8rem; font-weight: 600;
+}
+
+/* =========== PRINT =========== */
+@media print {
+  .mod-pipeline .view { display: block !important; }
+  .mod-pipeline .view > * { margin-bottom: 4mm; }
+  .mod-pipeline aside.left-panel .card[hidden] { display: flex !important; }
+  .mod-pipeline .card-body { overflow: visible; }
+}

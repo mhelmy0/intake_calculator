@@ -1,0 +1,63 @@
+﻿code,name,category,basis,n_LD,K,Kv,K1,Ki,Kd,velocity_ref,dn_min_mm,dn_max_mm,bom,connection,status,source,notes
+ENT-BELL,Bellmouth / well-rounded entrance,entrance,K,,0.04,,,,,segment,,,yes,none,verified,Crane TP-410 (fixed K),
+ENT-ROUND,Slightly rounded entrance,entrance,K,,0.23,,,,,segment,,,no,none,verified,Crane TP-410 (fixed K),
+ENT-SHARP,Sharp-edged (flush) entrance,entrance,K,,0.5,,,,,segment,,,no,none,verified,Crane TP-410 (fixed K),
+ENT-PROJ,Inward-projecting (Borda) entrance,entrance,K,,0.78,,,,,segment,,,no,none,verified,Crane TP-410 (fixed K),
+EXIT,Pipe exit into sump / tank / sea,exit,K,,1.0,,,,,segment,,,no,none,verified,Crane TP-410 (fixed K),
+SCR-CLEAN,Intake screen - clean,special,K,,0.5,,,,,segment,,,yes,none,placeholder,Typical value - use manufacturer data,
+SCR-FOUL50,Intake screen - 50% fouled,special,K,,2.5,,,,,segment,,,yes,none,placeholder,Typical value - use manufacturer data,Design case for gravity intake head budget
+INT-HEAD,Intake head / velocity cap,special,K,,1.0,,,,,segment,,,yes,none,placeholder,Typical value - use manufacturer data,
+ELB90-STD,90 deg standard elbow (r/D ~1),elbow,n,30,,,,,,segment,,,yes,butt_fusion,verified,Crane TP-410,
+ELB90-LR,90 deg long-radius elbow (r/D 1.5),elbow,n,16,,,,,,segment,,,yes,butt_fusion,verified,Crane TP-410,
+BND90-2D,90 deg bend r/D 2,bend,n,12,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+BND90-3D,90 deg bend r/D 3,bend,n,12,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+BND90-5D,90 deg bend r/D 5,bend,n,16,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+ELB45-STD,45 deg standard elbow,elbow,n,16,,,,,,segment,,,yes,butt_fusion,verified,Crane TP-410,
+BND45-LR,45 deg long-radius bend,bend,n,8,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+BND22,22.5 deg bend,bend,n,5,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+BND11,11.25 deg bend,bend,n,3,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+MIT90-2,Mitred 90 deg - 2 cuts (fabricated PE),bend,n,30,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+MIT90-3,Mitred 90 deg - 3 cuts (fabricated PE),bend,n,24,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+MIT90-4,Mitred 90 deg - 4 cuts (fabricated PE),bend,n,20,,,,,,segment,,,yes,butt_fusion,to_confirm,Crane TP-410,
+RET180,180 deg return bend,bend,n,50,,,,,,segment,,,yes,butt_fusion,verified,Crane TP-410,
+TEE-RUN,Equal tee - flow through run,tee,n,20,,,,,,combined,,,yes,butt_fusion,verified,Crane TP-410,
+TEE-BR,Equal tee - flow through branch,tee,n,60,,,,,,combined,,,yes,butt_fusion,verified,Crane TP-410,
+RTEE-RUN,Reducing tee - flow through run,tee,n,20,,,,,,combined,,,yes,butt_fusion,verified,Crane TP-410,
+RTEE-BR,Reducing tee - flow through branch,tee,n,60,,,,,,combined,,,yes,butt_fusion,verified,Crane TP-410,
+CRS-RUN,Cross - flow through run,cross,n,20,,,,,,combined,,,yes,butt_fusion,to_confirm,Crane TP-410,No Crane value for crosses - tee value used
+CRS-BR,Cross - flow through branch,cross,n,60,,,,,,combined,,,yes,butt_fusion,to_confirm,Crane TP-410,No Crane value for crosses - tee value used
+LAT45-BR,Lateral (Y) 45 deg - branch,tee,n,30,,,,,,combined,,,yes,butt_fusion,to_confirm,Crane TP-410,
+RED-CONC,Concentric reducer - gradual (<=30 deg),reducer,K,,0.05,,,,,small_end,,,yes,butt_fusion,to_confirm,Typical value,
+RED-ECC,Eccentric reducer - gradual (pump suction),reducer,K,,0.05,,,,,small_end,,,yes,butt_fusion,to_confirm,Typical value,
+EXP-CONC,Concentric expander - gradual (<=30 deg),expander,K,,0.2,,,,,small_end,,,yes,butt_fusion,to_confirm,Typical value,
+CONTR-SUD,Sudden contraction,reducer,formula,,,,,,,downstream,,,no,none,verified,Textbook (Borda-Carnot),K = 0.5(1-(D2/D1)^2) - calculated from segment diameters
+EXP-SUD,Sudden expansion,expander,formula,,,,,,,upstream,,,no,none,verified,Textbook (Borda-Carnot),K = (1-(D1/D2)^2)^2 - calculated from segment diameters
+FLG-ADPT,Flange adaptor / stub end + backing ring (pair),flange,K,,0,,,,,segment,,,yes,flanged,verified,Hydraulically negligible,BOM: + bolts and gasket
+FLG-WN,Weld-neck / slip-on flange (steel),flange,K,,0,,,,,segment,,,yes,flanged,verified,Hydraulically negligible,
+FLG-BLIND,Blind flange,flange,K,,0,,,,,segment,,,yes,flanged,verified,Hydraulically negligible,Not in flow path
+JNT-BF,Butt-fusion joint,joint,K,,0,,,,,segment,,,yes,butt_fusion,verified,Hydraulically negligible,Counted for BOM joint quantity
+JNT-EF,Electrofusion coupler,joint,K,,0,,,,,segment,,,yes,electrofusion,verified,Hydraulically negligible,
+CPL-MECH,Mechanical / flexible coupling,joint,K,,0,,,,,segment,,,yes,mechanical,verified,Hydraulically negligible,
+DISM,Dismantling joint,joint,K,,0,,,,,segment,,,yes,flanged,verified,Hydraulically negligible,
+GATE,Gate valve - fully open,valve,n,8,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+KNIFE,Knife gate valve - fully open,valve,n,8,,,,,,segment,,,yes,flanged,to_confirm,Crane TP-410,Gate valve value used - confirm with manufacturer
+BFV-S,Butterfly valve DN50-200 - fully open,valve,n,45,,,,,,segment,50,200,yes,flanged,verified,Crane TP-410,
+BFV-M,Butterfly valve DN250-350 - fully open,valve,n,35,,,,,,segment,250,350,yes,flanged,verified,Crane TP-410,
+BFV-L,Butterfly valve DN400-600 - fully open,valve,n,25,,,,,,segment,400,600,yes,flanged,verified,Crane TP-410,
+BFV-XL,Butterfly valve > DN600 - fully open,valve,n,25,,,,,,segment,700,3000,yes,flanged,to_confirm,Crane TP-410,Crane stops at 24 in - extrapolated
+BALL,Ball valve - full bore,valve,n,3,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+PLUG,Plug valve - straightway,valve,n,18,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+GLOBE,Globe valve,valve,n,340,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+ANGLE,Angle valve,valve,n,150,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+CHK-SWING,Swing check valve,check_valve,n,100,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+CHK-LIFT,Lift check valve,check_valve,n,600,,,,,,segment,,,yes,flanged,verified,Crane TP-410,
+CHK-DUAL,Dual-plate (wafer) check valve,check_valve,K,,1.5,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,
+CHK-NOZZLE,Nozzle / non-slam check valve,check_valve,K,,1.5,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,
+FOOT,Foot valve with strainer,check_valve,K,,1.5,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,
+CTRL,Control / pressure-reducing valve,valve,kv,,,,,,,segment,,,yes,flanged,placeholder,Manufacturer Kv,Enter Kv per valve in the project; K = 1.599e9*D^4/Kv^2
+AIRV,Air release / vacuum valve (on branch),valve,K,,0,,,,,segment,,,yes,flanged,verified,Not in main flow path,
+STR-BASKET,Basket strainer - clean,strainer,K,,1.0,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,
+STR-Y,Y-strainer - clean,strainer,K,,2.0,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,
+METER-MAG,Electromagnetic flow meter (full bore),meter,K,,0,,,,,segment,,,yes,flanged,verified,Full bore - negligible,
+METER-US,Ultrasonic flow meter (clamp-on / full bore),meter,K,,0,,,,,segment,,,yes,none,verified,Full bore - negligible,
+FLAP,Outfall flap / duckbill valve,special,K,,1.0,,,,,segment,,,yes,flanged,placeholder,Typical value - use manufacturer data,

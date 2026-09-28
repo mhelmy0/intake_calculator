@@ -1,0 +1,340 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>engine tests</title></head><body>
+<pre id="out"></pre>
+<script src="../assets/js/core/util.js"></script>
+<script src="../assets/js/core/units.js"></script>
+<script src="../assets/js/core/hydraulics.js"></script>
+<script src="../assets/js/core/pipes.js"></script>
+<script src="../assets/js/core/fluids.js"></script>
+<script src="../assets/js/core/csv.js"></script>
+<script src="../assets/data/fittings/recommended_v1.js"></script>
+<script src="../assets/js/core/values.js"></script>
+<script src="../assets/js/core/fittings.js"></script>
+<script src="../assets/js/core/pipeclass.js"></script>
+<script src="../assets/js/core/route.js"></script>
+<script src="../assets/js/core/pumpcurve.js"></script>
+<script>window.RO.registerModule = () => {};</script>
+<script src="../modules/intake/intake_calc.js"></script>
+<script src="../modules/pipeline/pipeline_calc.js"></script>
+<script src="../modules/buoyancy/buoyancy_calc.js"></script>
+<script src="../modules/bom/bom_calc.js"></script>
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/equiplib.js"></script>
+<script src="../modules/pretreat/pretreat_calc.js"></script>
+<script>
+/* Engine unit tests (no server needed). Open in a browser or headless Chrome; results in #out. */
+const out = []; let fails = 0;
+const near = (n, got, exp, tol) => { const ok = Math.abs(got - exp) <= tol; if (!ok) fails++; out.push(`${ok ? "PASS" : "FAIL"}  ${n}: got ${got}, expected ${exp} ± ${tol}`); };
+const eq = (n, got, exp) => { const ok = JSON.stringify(got) === JSON.stringify(exp); if (!ok) fails++; out.push(`${ok ? "PASS" : "FAIL"}  ${n}: got ${JSON.stringify(got)}, expected ${JSON.stringify(exp)}`); };
+(async () => {
+try {
+  const G = 9.81;
+  await RO.fittings.loadRecommended();
+  eq("bundled list loaded (62)", RO.fittings.active().items.length, 62);
+  const F = RO.fluids.compute({ preset: "sea", T_C: 28, S_gkg: 40 });
+
+  // --- single segment = hand calc (DN500 SDR17, 750 m3/h, 550 m, no fittings)
+  const seg = RO.route.newSegment({ name: "S1", dn: 500, sdr: 17, L_m: 550 });
+  const Q = 750 / 3600;
+  const r = RO.route.evalSegment(seg, Q, F);
+  const D = 0.4406, V = Q / (Math.PI * D * D / 4), Re = V * D / F.nu, f = RO.hyd.swameeJain(1.5e-6, D, Re);
+  near("segment V", r.V, V, 1e-9);
+  near("segment hf = DW(SJ)", r.hf, f * 550 / D * V * V / (2 * G), 1e-9);
+
+  // --- Crane K: 90° LR elbow n=16 at D=0.4406 → n·fT
+  const fT = 0.25 / Math.pow(Math.log10(0.045e-3 / (3.7 * D)), 2);
+  near("fT(DN500) ≈ 0.012", fT, 0.0120, 0.0006);
+  const s2 = RO.route.newSegment({ dn: 500, sdr: 17, L_m: 0, fittings: [{ code: "ELB90-LR", qty: 3 }, { code: "EXIT", qty: 1 }, { code: "GATE", qty: 1, k: 0.5 }] });
+  const r2 = RO.route.evalSegment(s2, Q, F);
+  near("ΣK = 3·16·fT + 1.0 + override 0.5", r2.sumK, 48 * fT + 1.0 + 0.5, 1e-12);
+  near("hm = ΣK·V²/2g", r2.hm, r2.sumK * V * V / (2 * G), 1e-12);
+  eq("override flagged", r2.fits.find(x => x.code === "GATE").overridden, true);
+
+  // --- size-ranged family: BFV-S requested on OD 500 → BFV-L (n=25)
+  const s3 = RO.route.newSegment({ dn: 500, sdr: 17, L_m: 0, fittings: [{ code: "BFV-S", qty: 1 }] });
+  const r3 = RO.route.evalSegment(s3, Q, F);
+  eq("BFV family switched to BFV-L", r3.fits[0].code, "BFV-L");
+  near("BFV-L K = 25·fT", r3.fits[0].K, 25 * fT, 1e-12);
+
+  // --- Kv: DN100 Kv 400 → K ≈ 1.0 (equations.md §4.6)
+  const kvItem = RO.fittings.resolve("CTRL", 110).item;
+  near("Kv→K DN100", RO.fittings.kOf(kvItem, 0.1, 1e5, { kv: 400 }).K, 1.599e9 * 1e-4 / 160000, 1e-9);
+  // --- 3-K
+  const k3 = RO.fittings.kOf({ basis: "3k", k1: 800, ki: 0.14, kd: 4 }, 0.0525, 1e5).K;
+  near("3-K threaded elbow 2in", k3, 800 / 1e5 + 0.14 * (1 + 4 / Math.pow(0.0525 / 0.0254, 0.3)), 1e-12);
+
+  // --- transitions: DN500→DN400 sudden contraction and gradual
+  const side = { nLines: 1, transition: "sudden", segments: [RO.route.newSegment({ name: "A", dn: 500, sdr: 17, L_m: 10 }), RO.route.newSegment({ name: "B", dn: 400, sdr: 17, L_m: 10 })] };
+  let sd = RO.route.evalSide(side, Q, F);
+  const D1 = 0.4406, D2 = 400 - 2 * 23.7; const d2 = D2 / 1000;
+  const V2 = Q / (Math.PI * d2 * d2 / 4);
+  near("sudden contraction K", sd.trans[0].K, 0.5 * (1 - (d2 / D1) ** 2), 1e-12);
+  near("side h = segs + transition", sd.h, sd.segs[0].h + sd.segs[1].h + sd.trans[0].K * V2 * V2 / (2 * G), 1e-12);
+  side.transition = "gradual"; sd = RO.route.evalSide(side, Q, F);
+  near("gradual reducer K = 0.05", sd.trans[0].K, 0.05, 1e-12);
+  side.transition = "none"; sd = RO.route.evalSide(side, Q, F);
+  eq("no transition", sd.trans.length, 0);
+  // parallel lines split the flow
+  side.nLines = 2; sd = RO.route.evalSide(side, Q, F);
+  near("2 lines → half flow per line", sd.Qline, Q / 2, 1e-12);
+
+  // --- pump curve: exact quadratic H = 40 − 1e-5 Q² recovered
+  const pts = [0, 250, 500, 750, 1000].map(q => ({ q_m3h: q, h_m: 40 - 1e-5 * q * q, eff_pct: 80 - 8e-5 * (q - 750) ** 2 }));
+  const pf = RO.pumpcurve.fit({ points: pts });
+  near("fit H(600)", pf.head(600), 40 - 1e-5 * 360000, 1e-9);
+  near("BEP from η fit = 750", pf.bep, 750, 5);
+  // system H = 10 + 2e-5 Q², 2 pumps: 40 − 1e-5 (Q/2)² = 10 + 2e-5 Q² → Q² (2e-5 + 2.5e-6) = 30
+  const op = RO.pumpcurve.operatingPoint(pf, 2, Qt => 10 + 2e-5 * Qt * Qt);
+  near("operating point (analytic)", op.Q, Math.sqrt(30 / 2.25e-5), 0.01);
+  near("per-pump flow", op.Q1, op.Q / 2, 1e-9);
+  eq("no crossing → null", RO.pumpcurve.operatingPoint(pf, 1, () => 100), null);
+
+  // --- class check (same as v1 module): OD500 e=28 → thin → SDR21 PN8
+  const cc = RO.pipeclass.classCheck({ OD: 500, e: 28, grade: "PE100", T: 28, k_surge: 1 });
+  eq("class check thin wall", [cc.catStatus, cc.rated, cc.PN_rated], ["thin", 21, 8]);
+  near("derating 28 °C", cc.fT, 0.896, 1e-9);
+
+  // --- REGRESSION vs legacy/intake_calc_original.html (gravity tab, defaults, DN560 SDR17)
+  // Legacy fluid: rhoOf(28) = 1024.4, nuOf(28) = 1.79e-6/(1+0.033·8+0.00022·64) (legacy formula incl. its T−20 offset)
+  const nuLegacy = 1.79e-6 / (1 + 0.033 * 8 + 0.00022 * 64);
+  const FL = RO.fluids.compute({ preset: "custom", T_C: 28, rho: 1024.4, nu_cSt: nuLegacy * 1e6, K_GPa: 2.2 });
+  const S0 = RO.intakeCalc.defaultState();
+  S0.routes.gravity.segments[0].dn = 560;
+  const gr = RO.intakeCalc.computeGravity(S0, FL);
+  // legacy displayed values (3 d.p.): V 1.089, V_qmin 1.016, H_req 1.139, hf 0.927, hm 0.211, margin 0.061, f 0.01377, sump 75.0 / 10.71
+  near("legacy V @ Q_max", gr.main.V, 1.089, 0.0005);
+  near("legacy V @ Q_min one pipe", gr.V_qmin, 1.016, 0.0005);
+  near("legacy friction loss hf", gr.hf, 0.927, 0.0005);
+  near("legacy minor loss hm (ΣK 3.5)", gr.hm, 0.211, 0.0005);
+  near("legacy required head", gr.H_required, 1.139, 0.0006);
+  near("legacy margin @ LAT", gr.margin_LAT, 0.061, 0.0006);
+  near("legacy friction factor", gr.main.f, 0.01377, 0.000005);
+  near("legacy sump volume", gr.V_sump, 75.0, 0.05);
+  near("legacy sump length", gr.sump_length, 10.71, 0.005);
+  eq("legacy margin check now fails (margin < 0.2 m)", gr.checks[0].status, "fail");
+  near("HI 9.8 submergence (DN560)", gr.S_min, 1.055, 0.0006);
+  const sug = RO.intakeCalc.suggestGravityDN(S0, FL);
+  eq("DN suggestion for legacy case", sug.dn, 630);
+
+  // --- pump station + selection end-to-end (default state, seawater)
+  const S1 = RO.intakeCalc.defaultState();
+  const st = RO.intakeCalc.computeStation(S1, F);
+  near("TDH = static + losses", st.TDH_min, (S1.station.z_delivery - S1.levels.sump_min) + st.evS.h + st.evD.h, 1e-9);
+  near("NPSHa formula", st.NPSHa, (101325 / (F.rho * G)) + (S1.levels.sump_min - S1.station.z_pump) - st.evS.h - F.Pv / (F.rho * G), 1e-9);
+  const hsys = st.sysH(S1.levels.sump_min);
+  near("system curve at Q_design = TDH", hsys(S1.flow.Q_design), st.TDH_min, 1e-9);
+  // A pump that suits the default duty (≈ 1500 m³/h total, TDH ≈ 15 m with 2 duty)
+  eq("oversized pump → runout reported (null op point)", RO.intakeCalc.computeSelection(S1, F, st,
+     { points: [0, 500, 1000].map(q => ({ q_m3h: q, h_m: 40 - 1e-5 * q * q })) }).opMax, null);
+  const pumpPts = [0, 250, 500, 750, 900, 1000].map(q => ({ q_m3h: q, h_m: 30 - 1.5e-5 * q * q, eff_pct: 80 - 0.00006 * (q - 750) ** 2, npshr_m: 2 + 3 * (q / 750) ** 2 }));
+  const sel = RO.intakeCalc.computeSelection(S1, F, st, { vendor: "T", model: "t", motor_kw: 150, points: pumpPts });
+  near("op point satisfies H₁(Q/n) = H_sys(Q)", sel.pf.head(sel.opMin.Q / 2), hsys(sel.opMin.Q), 1e-6);
+  eq("selection checks include duty + NPSH + motor", ["Duty", "NPSH", "Motor"].every(k => sel.checks.some(c => c.name.includes(k))), true);
+  const rk = RO.intakeCalc.rankPumps(S1, F, [{ vendor: "T", model: "t", motor_kw: 150, points: pumpPts }]);
+  eq("ranking finds the pump with ≤ 6 duty", rk.length === 1 && rk[0].n >= 1, true);
+  const su = RO.intakeCalc.computeSurge(S1, F, RO.intakeCalc.computeGravity(S1, F), st, sel);
+  const gv = su.gov;
+  near("surge ΔP = ρ a V (governing)", su.dPgov, F.rho * gv.a * gv.s.V / 1e5, 1e-9);
+  eq("shut-off pressure used when pump selected", su.rows.every(r => r.P_shut !== null), true);
+  eq("default design: velocities within limits", st.checks.filter(c => c.name.includes("velocity")).every(c => c.status !== "fail"), true);
+
+  // --- units (SI ↔ Imperial round trips; SI stored internally)
+  RO.units.set("imp");
+  near("1500 m³/h → gpm", RO.units.toDisp("flow", 1500), 6604.3, 0.1);
+  near("gpm → m³/h round trip", RO.units.toSI("flow", RO.units.toDisp("flow", 1234.5)), 1234.5, 1e-9);
+  near("25 °C → 77 °F", RO.units.toDisp("temp", 25), 77, 1e-9);
+  near("psi → bar", RO.units.parse("press", "14.50377"), 1, 1e-6);
+  eq("parse blank → null", RO.units.parse("head", " "), null);
+  RO.units.set("si");
+  eq("SI identity", RO.units.toDisp("flow", 1500), 1500);
+
+  // --- design basis → effective state, TDS → salinity
+  near("TDS 41,000 mg/L @ 25 °C → S ≈ 39.9 g/kg", RO.intakeCalc.tdsToS(25, 41000), 39.93, 0.05);
+  const S2 = RO.intakeCalc.defaultState();
+  S2.line.material = "CS"; S2.line.eps_mm = null;
+  const X = RO.intakeCalc.effective(S2);
+  eq("line material applied to discharge segments", X.routes.discharge.segments.every(s => s.material === "CS" && s.custom === true), true);
+  near("roughness REC from material (steel 0.045 mm)", X.routes.discharge.segments[0].eps_mm, 0.045, 1e-12);
+  near("residual pressure REC (2.0 bar)", X.station.P_delivery, 2.0, 1e-12);
+
+  // --- pump sizing chain (design: TDH × (1 + margin), P_h, P_s, P_in, IEC motor)
+  const Fs = RO.fluids.compute({ preset: "sea", T_C: 25, S_gkg: 40 });
+  const S3 = RO.intakeCalc.defaultState();
+  const R3 = RO.intakeCalc.compute(S3, Fs, null);
+  const sz = R3.sizing, st3 = R3.station;
+  near("H = TDH × 1.10", sz.H, st3.TDH_min * 1.10, 1e-9);
+  near("P_h = ρgQH", sz.Ph, Fs.rho * G * (1500 / 3600) * sz.H / 1000, 1e-9);
+  near("P_s = P_h / 0.78", sz.Ps, sz.Ph / 0.78, 1e-9);
+  near("P_in = P_s / 0.95", sz.Pin, sz.Ps / 0.95, 1e-9);
+  eq("motor = smallest IEC ≥ 1.15 × P_s per pump", sz.motor, RO.intakeCalc.MOTORS.find(m => m >= sz.Ps1 * 1.15));
+  near("static head + residual head + losses = TDH", sz.Hs + sz.hp + sz.hf + sz.hm, st3.TDH_min, 1e-6);
+  // recommended OD: 750 m³/h per pump at 1.5 m/s, SDR 11 → smallest OD with V ≤ 1.5
+  const od = RO.intakeCalc.recOD({ sdr: 11, custom: false }, 750 / 3600, 1.5);
+  const eOd = RO.pipes.catalogueWall(od, 11).e, Dod = (od - 2 * eOd) / 1000;
+  eq("recOD gives V ≤ 1.5 m/s", (750 / 3600) / (Math.PI * Dod * Dod / 4) <= 1.5, true);
+  const prev = RO.pipes.ISO_OD_LIST[RO.pipes.ISO_OD_LIST.indexOf(od) - 1], ePrev = RO.pipes.catalogueWall(prev, 11).e, Dp = (prev - 2 * ePrev) / 1000;
+  eq("recOD is the smallest such size", (750 / 3600) / (Math.PI * Dp * Dp / 4) > 1.5, true);
+
+  // --- CSV parser
+  const rows = RO.csv.parseObjects('﻿a,b\n"x, y","q""z"\n1,2\n');
+  eq("csv quotes/commas", rows, [{ a: "x, y", b: 'q"z' }, { a: "1", b: "2" }]);
+
+  // --- PIPELINE DESIGN (PRD §8A.4, equations.md §5A)
+  const PC = RO.pipelineCalc, Fp = RO.fluids.compute({ preset: "sea", T_C: 25, S_gkg: 40 }), rgp = Fp.rho * G;
+  const fits3 = [{ code: "ELB90-LR", qty: 3, k: null, kv: null, x: null }, { code: "EXIT", qty: 1, k: null, kv: null, x: null }];
+  // 1) flat single segment reproduces the Intake route engine
+  const P1 = PC.defaultState();
+  Object.assign(P1, { mode: "pumped", flow: { Q_design: 750, Q_min: 750, Q_max: 750, nLines: 1 }, start: { type: "level", level: 0, pressure: null },
+    end: { type: "delivery", z: 5, residual: 1.0, level: null }, line: { material: "PE100", eps_mm: null, cover: 1.0, submerged: false, transition: "gradual" },
+    profile: [{ x: 0, ground: 6, cover: null, z: null, label: "" }, { x: 550, ground: 6, cover: null, z: null, label: "" }],
+    segments: [{ name: "S1", x1: null, dn: 500, sdr: 17, custom: false, od_mm: 500, e_mm: 29.7, joint: "butt_fusion", fittings: fits3 }] });
+  const R1 = PC.compute(P1, Fp);
+  const evI = RO.route.evalSide({ nLines: 1, transition: "gradual", segments: [RO.route.newSegment({ dn: 500, sdr: 17, L_m: 550, fittings: fits3.map(f => ({ code: f.code, qty: f.qty })) })] }, 750 / 3600, Fp);
+  near("pipeline flat = intake route losses", R1.hTotal, evI.h, 1e-9);
+  near("pipeline centreline = ground − cover − OD/2", R1.geo.pts[0].z, 6 - 1 - 0.25, 1e-12);
+  near("pipeline required inlet P = ρg(z_del + P_res/ρg + Σh − z0)", R1.Pin, rgp * (5 + 1e5 / rgp + evI.h - 4.75) / 1e5, 1e-9);
+  near("pipeline TDH = H_in − suction level", R1.TDH, 5 + 1e5 / rgp + evI.h - 0, 1e-9);
+  near("pipeline walk of losses ends at h_total", R1.HGL0 - R1.stations[R1.stations.length - 1].HGL, R1.hTotal, 1e-9);
+  // 2) worked example with a high point (hand calc)
+  const P2 = JSON.parse(JSON.stringify(P1));
+  P2.flow.Q_design = 1000;
+  P2.profile = [{ x: 0, ground: null, cover: null, z: 0, label: "" }, { x: 300, ground: null, cover: null, z: 40, label: "crest" }, { x: 700, ground: null, cover: null, z: 0, label: "" }];
+  P2.segments[0].fittings = [];
+  P2.end = { type: "level", z: null, residual: null, level: 10 };
+  const R2 = PC.compute(P2, Fp);
+  const L1 = Math.hypot(300, 40), L2 = Math.hypot(400, 40);
+  near("along-pipe length √(Δx²+Δz²)", R2.La, L1 + L2, 1e-9);
+  eq("horizontal length", R2.Lh, 700);
+  const e2 = RO.route.evalSegment(RO.route.newSegment({ dn: 500, sdr: 17, L_m: L1 + L2 }), 1000 / 3600, Fp);
+  const crest = R2.stations.find(s => s.x === 300);
+  near("HGL at crest = HGL0 − hf·L₁/L", crest.HGL, 10 + e2.hf - e2.hf * L1 / (L1 + L2), 1e-9);
+  near("pressure at crest = ρg(HGL − z)", crest.p, rgp * (crest.HGL - 40) / 1e5, 1e-12);
+  eq("high point found at the crest", R2.extrema.highs.map(p => p.x), [300]);
+  eq("air valve flagged (onshore)", R2.checks.find(c => c.key === "av").list, [300]);
+  const P2s = JSON.parse(JSON.stringify(P2)); P2s.line.submerged = true;
+  const R2s = PC.compute(P2s, Fp);
+  eq("submerged line: no air-valve check", [!!R2s.checks.find(c => c.key === "av"), !!R2s.checks.find(c => c.key === "sub")], [false, true]);
+  eq("sub-atmospheric zone around the crest", R2.zones.length === 1 && R2.zones[0].x0 < 300 && R2.zones[0].x1 > 300, true);
+  // 3) located fitting = step of K·V²/2g at its chainage
+  const P3 = JSON.parse(JSON.stringify(P1)); P3.segments[0].fittings = [{ code: "GATE", qty: 1, k: 2.0, kv: null, x: 200 }];
+  const R3p = PC.compute(P3, Fp), at = R3p.stations.filter(s => s.x === 200);
+  near("located fitting step = K·V²/2g", at[0].HGL - at[1].HGL, 2.0 * R3p.segs[0].ev.V ** 2 / (2 * G), 1e-9);
+  // 4) gravity: margin and capacity root
+  const P4 = JSON.parse(JSON.stringify(P1));
+  Object.assign(P4, { mode: "gravity", start: { type: "level", level: 12, pressure: null }, end: { type: "level", z: null, residual: null, level: 10 } });
+  const R4 = PC.compute(P4, Fp);
+  near("gravity margin = available − Σh", R4.margin, 2 - R4.hTotal, 1e-9);
+  near("gravity capacity: Σh(Q_cap) = available head", RO.route.evalSide(R4.side, R4.Qcap / 3600, Fp).h, 2, 1e-6);
+  // 5) parsing, validation, extrema
+  const pr = PC.parseProfileRows([["Chainage (ft)", "Ground level (ft)", "Label"], ["0", "10", "A"], ["328.084", "x", "B"], ["656.168", "20", "C"]], false);
+  eq("profile paste: header + feet + bad row skipped", [pr.points.length, +pr.points[1].x.toFixed(3), +pr.points[1].ground.toFixed(4), pr.points[1].label, pr.errors.length], [2, 200, 6.096, "C", 1]);
+  const pp = PC.parseProfileRows([["0", "5", "", "3.2", "start"], ["100", "6"]], false);
+  eq("profile paste: positional columns", [pp.points[0].z, pp.points[0].cover, pp.points[1].ground], [3.2, null, 6]);
+  const bad = JSON.parse(JSON.stringify(P1)); bad.profile[1].x = 0;
+  eq("validation: chainage must increase", /must increase/.test(PC.validate(PC.effective(bad)).join()), true);
+  const bad2 = JSON.parse(JSON.stringify(P1)); bad2.segments = [Object.assign({}, bad2.segments[0], { x1: 900 }), PC.newSegment(bad2.segments[0])];
+  eq("validation: segment beyond profile end", /beyond the profile end/.test(PC.validate(PC.effective(bad2)).join()), true);
+  const ex = PC.extrema([0, 5, 5, 2, 8, 8, 8, 1].map((z, k) => ({ x: k, z })));
+  eq("extrema: flat runs counted once", [ex.highs.map(p => p.x), ex.lows.map(p => p.x)], [[1, 4], [3]]);
+  // 6) quantities and Send to Intake
+  const P6 = JSON.parse(JSON.stringify(P2)); P6.flow.nLines = 2;
+  const R6 = PC.compute(P6, Fp);
+  near("quantities: along-pipe length × lines", R6.quantities.pipes[0].La, 2 * (L1 + L2), 1e-9);
+  const tr = PC.toIntakeRoute(P6, R6);
+  near("Send to Intake: segment length = along-pipe length", tr.segments[0].L_m, L1 + L2, 0.01);
+  eq("Send to Intake: Δz and profile points", [tr.segments[0].dz_m, tr.profile.pts.length], [0, 3]);
+  // reach length editing: later points, segment ends and located fittings move with it
+  const L1s = PC.defaultState();
+  eq("setReachLength: reach 3 (400→650) to 3000 m moves later points", [PC.setReachLength(L1s, 3, 3000), L1s.profile.map(p => p.x)], [true, [0, 150, 400, 3400, 3650, 3950]]);
+  eq("setReachLength: segment end at the reach start stays; end-of-line fittings move", [L1s.segments[0].x1, L1s.segments[1].fittings[1].x], [400, 3950]);
+  eq("after lengthening the line still validates", PC.validate(PC.effective(L1s)), []);
+  const L2s = PC.defaultState(); PC.setReachLength(L2s, 2, 3000);
+  eq("setReachLength: segment end at the reach end shifts with it", [L2s.segments[0].x1, L2s.profile[2].x], [3150, 3150]);
+  const L3s = PC.defaultState(); L3s.segments[0].x1 = 275; PC.setReachLength(L3s, 2, 500);
+  eq("setReachLength: segment end inside the reach scales", L3s.segments[0].x1, 400);
+  eq("setReachLength: rejects zero / first point", [PC.setReachLength(PC.defaultState(), 2, 0), PC.setReachLength(PC.defaultState(), 0, 100)], [false, false]);
+  const R0 = PC.compute(PC.defaultState(), Fp);
+  eq("default pipeline computes (2 segments, diameter comparison 5 sizes)", [!R0.errors, R0.segs.length, R0.compare.rows.length], [true, 2, 5]);
+
+  // --- SUPPORTS & BUOYANCY (equations.md §9.5)
+  const BC = RO.buoyancyCalc;
+  const Pb = { rhoW: 1025, rhoB: 2400, rhoP: 960, sf: 1.5, wf: 1.0, rhoG: 1325, rhoC: 1025, def: "A" };
+  const deep = BC.section(BC.newSection({ name: "deep", custom: true, od: 32, e_mm: 3.0, bundle: 3, piece_kg: 12, pieces: 1, spacing: 3, L: 200, contents: "air" }), Pb);
+  near("legacy 'deep' case re-run: SF_A = 1.36 (§9.4)", deep.SF_A, 1.36, 0.005);
+  const Ao = Math.PI / 4 * 0.032 ** 2, Aw = Ao - Math.PI / 4 * 0.026 ** 2;
+  near("W_DW = ρ_W g π/4 D_o²", deep.WDW, 1025 * G * Ao, 1e-9);
+  near("W_P = ρ_P g × wall area", deep.WP, 960 * G * Aw, 1e-9);
+  near("SF_B = (n W_P + ballast) / (n W_DW)", deep.SF_B, (3 * deep.WP + 12 * G * (1 - 1025 / 2400) / 3) / (3 * deep.WDW), 1e-9);
+  eq("locations = ⌈L/Ls⌉ + 1", deep.N, 68);
+  const reqd = BC.section(BC.newSection({ name: "r", custom: true, od: 32, e_mm: 3.0, bundle: 3, piece_kg: deep.reqLoc, pieces: 1, spacing: 3, L: 200 }), Pb);
+  near("required mass per location gives the target SF", reqd.SF_A, 1.5, 1e-9);
+  near("largest spacing gives the target SF", BC.section(BC.newSection({ custom: true, od: 32, e_mm: 3.0, bundle: 3, piece_kg: 12, pieces: 1, spacing: deep.maxSpacing, L: 200 }), Pb).SF_A, 1.5, 1e-9);
+  const wet = BC.section(BC.newSection({ custom: true, od: 32, e_mm: 3.0, bundle: 3, piece_kg: 12, pieces: 1, spacing: 3, L: 200, contents: "water" }), Pb);
+  eq("water-filled pipe needs less ballast (higher SF)", wet.SF_A > deep.SF_A, true);
+  const wf = BC.section(BC.newSection({ od: 630, sdr: 17, bundle: 1 }), Object.assign({}, Pb, { wf: 1.06 }));
+  near("PPI wall factor: D_I = D_O − 2 × 1.06 e", wf.Di, 630 - 2 * 1.06 * RO.pipes.catalogueWall(630, 17).e, 1e-9);
+  // --- BILL OF MATERIALS (equations.md §9B)
+  const BM = RO.bomCalc;
+  eq("flange DN for OD 630 / 560 / 110", [BM.dnFor(630), BM.dnFor(560), BM.dnFor(110)], [600, 500, 100]);
+  const segB = o => Object.assign({ source: "t", name: "s", material: "PE100", OD: 500, e: RO.pipes.catalogueWall(500, 17).e, sdr: 17, custom: false, L: 100, joint: "butt_fusion", mult: 2, fittings: [] }, o);
+  const B1 = BM.build({ stick_m: 12, allowance_pct: 3, segs: [segB({ fittings: [{ code: "BFV-L", qty: 1 }, { code: "TEE-BR", qty: 1 }, { code: "EXIT", qty: 1 }] })] });
+  near("pipe order length = net × 1.03", B1.pipes[0].order, 200 * 1.03, 1e-9);
+  eq("pipe sticks = ⌈order / 12⌉", B1.pipes[0].sticks, 18);
+  const qs = (rows, pred) => rows.filter(pred).reduce((a, r) => a + r.qty, 0);
+  eq("butt-fusion joints = (⌈L/12⌉−1)×lines + tee ends", qs(B1.joints, j => j.type === "butt_fusion"), 8 * 2 + 3 * 2);
+  eq("flanged valve: 2 ends → stub ends, gaskets, bolt sets", [qs(B1.flanges, f => /Stub/.test(f.item)), qs(B1.flanges, f => f.item === "Gasket"), qs(B1.flanges, f => /Bolt/.test(f.item))], [4, 4, 4]);
+  eq("flange rating from pipe PN (SDR 17 → PN 10, DN 500)", B1.flanges[0].rating + " " + B1.flanges.find(f => f.item === "Gasket").size, "PN 10 DN 500");
+  eq("non-BOM items skipped (exit)", B1.fittings.map(f => f.code).sort(), ["BFV-L", "TEE-BR"]);
+  const B2 = BM.build({ stick_m: 12, allowance_pct: 0, segs: [segB({ joint: "flanged", L: 30, mult: 1 })] });
+  eq("flanged segment: pipe-to-pipe flange = 2 stub ends + 1 gasket", [qs(B2.flanges, f => /Stub/.test(f.item)), qs(B2.flanges, f => f.item === "Gasket")], [4, 2]);
+  const I = BM.fromIntake(RO.intakeCalc.defaultState());
+  eq("intake default: pump-local discharge × installed pumps (3), main × lines", I.segs.filter(s => s.source === "Intake · discharge").map(s => s.mult), [3, 1]);
+  eq("intake default: gravity line × 2 lines", I.segs.filter(s => /gravity/.test(s.source)).map(s => s.mult), [2]);
+  const Pl = BM.fromPipeline(PC.defaultState());
+  near("pipeline source: length along the pipe", Pl.segs.reduce((a, s) => a + s.L, 0), R0.La, 1e-6);
+  const Bb = BM.build({ segs: [], buoyancy: RO.buoyancyCalc.compute(RO.buoyancyCalc.defaultState(), Fp) });
+  eq("ballast blocks carried into the BOM", Bb.blocks.length === 1 && Bb.blocks[0].pieces > 0, true);
+
+  // --- PRETREATMENT (equations.md §11, Pretreatment PRD v0.2)
+  const PT = RO.pretreatCalc, S0p = PT.defaultState();
+  const d1 = PT.daf(Object.assign({}, S0p.daf, { Q: 4000, N: 2 }), Fp);
+  near("DAF area per unit = Q_net / N / HLR (20 m/h)", d1.A, 100, 1e-9);
+  near("DAF L : W = 2 : 1", d1.L / d1.W, 2, 1e-9);
+  near("DAF inflow = net ÷ recovery (98 %)", d1.Qin, 4000 / 0.98, 1e-9);
+  near("DAF rate with one unit out", d1.rateN1, 40, 1e-9);
+  near("DAF air dose = R s_a (f P_abs/P_atm − 1)/(1 + R)", d1.air, 0.12 * 18.7 * (0.8 * 6.51325 / 1.01325 - 1) / 1.12, 1e-9);
+  near("flocculation power = G² μ V", d1.coag.Pf, 50 * 50 * Fp.mu * (4000 / 0.98 / 60 * 8) / 1000, 1e-9);
+  near("float solids incl. Fe(OH)₃ = 0.659 × FeCl₃", d1.sludge, 4000 / 0.98 * 24 * (20 * 0.9 + 106.87 / 162.2 * 5) / 1000, 1e-9);
+  const s1 = PT.sedimentation(Object.assign({}, S0p.sedimentation, { Q: 1200, N: 2, type: "conventional" }), Fp);
+  near("conventional settling area = Q / SOR (1.2 m/h)", s1.A, 1000, 1e-9);
+  near("depth = SOR × detention (2.5 h)", s1.depth, 3.0, 1e-9);
+  near("minimum weir length = Q·24 / 250", s1.weirMin, 1200 * 24 / 250, 1e-9);
+  const m1 = PT.media(S0p.media);
+  near("filter area Ø3.0 m", m1.A, Math.PI * 9 / 4, 1e-9);
+  eq("N−1 rate ≤ 12.5 m/h and N filters the smallest count", m1.vN1 <= 12.5 && m1.vN <= 10 && (m1.Qg / ((m1.N - 2) * m1.A) > 12.5 || m1.Qg / ((m1.N - 1) * m1.A) > 10), true);
+  near("gross flow = net + daily backwash water / 24", m1.Qg, 4000 + m1.N * m1.A * (45 * 10 + m1.vn * 5) / 60 * 24 / 24 / 24, 1e-6);
+  near("L/dₑ = 800/1.2 + 600/0.5", m1.ld.sum, 800 / 1.2 + 600 / 0.5, 1e-9);
+  const m2 = PT.media(Object.assign({}, S0p.media, { media: "tri", fine: true, anth: { depth: 0.5, es: 1.2 }, sand: { depth: 0.2, es: 0.6 } }));
+  near("tri-media target 1250 × 1.15", m2.ld.target, 1250 * 1.15, 1e-9);
+  eq("shallow bed fails L/dₑ", m2.checks.find(c => c.key === "ld").status, "fail");
+  near("scale factor brings Σ L/dₑ to the target", m2.ld.layers.reduce((a, l) => a + l.depth * m2.ld.scale * 1000 / l.es, 0), m2.ld.target, 1e-9);
+  const b1 = PT.bag(Object.assign({}, S0p.bag, { Q: 3900 }), 5);
+  eq("bags = ⌈3900/20⌉, housings of 8 = ⌈195/8⌉, installed with 1 standby", [b1.n, b1.nh, b1.installed], [195, 25, 208]);
+  near("actual flow per bag", b1.q, 3900 / 200, 1e-9);
+  const c1 = PT.cartridge(Object.assign({}, S0p.cartridge, { Q: 3900 }));
+  near("cartridge 0.8 m³/h per 10\" × 40\" = 3.2 m³/h per element", c1.qe, 3.2, 1e-9);
+  eq("elements ⌈3900/3.2⌉ = 1219, housings of 150 = 9, installed 1500, 6000 / year", [c1.n, c1.nh, c1.installed, c1.perYear], [1219, 9, 1500, 6000]);
+  const fe = PT.dosingRow(S0p.dosing.rows[1]);
+  near("FeCl₃ active 4100 × 5 / 1000 kg/h", fe.ma, 20.5, 1e-9);
+  near("FeCl₃ product L/h = active / 0.40 / 1.42", fe.Vp, 20.5 / 0.4 / 1.42, 1e-9);
+  eq("storage needs site days (no default)", [fe.storage, fe.checks.some(c => c.key === "days")], [null, true]);
+  const sm = PT.dosingRow(S0p.dosing.rows[4]);
+  near("SMBS dose = 3.0 × 0.5 mg/L chlorine", sm.dose, 1.5, 1e-12);
+  near("SMBS solution L/h at 10 %", sm.Vs, 3900 * 1.5 / 1000 / (0.10 * 1.05), 1e-9);
+  const csv = RO.equiplib.parseCsv(RO.equiplib.templateCsv());
+  eq("equipment CSV template parses back (all generic rows valid)", [csv.records.length, csv.errors.length], [RO.equiplib.GENERIC.length, 0]);
+} catch (e) { fails++; out.push("EXCEPTION " + e.stack); }
+out.unshift(`=== ${fails} failure(s) ===`);
+document.getElementById("out").textContent = out.join("\n");
+document.title = "DONE";
+})();
+</script></body></html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>UI tests</title>
+<style>iframe { width: 1920px; height: 1080px; border: 0; }</style></head><body>
+<pre id="out">running…</pre>
+<iframe id="app"></iframe>
+<script>
+/* UI tests for the RO Workbench shell + Intake — serve over HTTP (php -S) and open tests/ui_test.html. */
+const out = []; let fails = 0;
+const ok = (n, c, d = "") => { if (!c) fails++; out.push(`${c ? "PASS" : "FAIL"}  ${n}${c ? "" : "  -> " + d}`); };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+try { localStorage.removeItem("rocalc.intake.draft"); localStorage.removeItem("rocalc.pipeline.draft"); localStorage.removeItem("rocalc.buoyancy.draft"); localStorage.removeItem("rocalc.bom.prefs"); localStorage.removeItem("rocalc.pretreat.draft"); localStorage.setItem("roshell.prefs", "{}"); sessionStorage.clear(); } catch (e) {}
+const frame = document.getElementById("app");
+frame.src = "../index.html#/intake/sizing";
+frame.addEventListener("load", async () => {
+  const W = frame.contentWindow, D = W.document, $ = id => D.getElementById(id);
+  const fire = (el, type) => el.dispatchEvent(new W.Event(type, { bubbles: true }));
+  const setIn = (el, v) => { el.value = v; fire(el, "input"); fire(el, "change"); };
+  const kpi = i => D.querySelectorAll(".kpi .kpi-v")[i].textContent.replace(/,/g, "");
+  try {
+    await sleep(1500);
+    const mod = W.RO.app.modules().find(m => m.id === "intake");
+    ok("page title = Intake pump sizing", $("page-title").textContent === "Intake pump sizing", $("page-title").textContent);
+    ok("breadcrumb Design / Intake / Pump sizing", /Design\s*\/\s*Intake\s*\/\s*Pump sizing/.test($("crumbs").textContent), $("crumbs").textContent);
+    ok("rail collapsed by default", !$("rail").hidden && $("side").hidden);
+    ok("guest banner + tag", !$("banner-guest").hidden && !$("guest-tag").hidden);
+    const H0 = parseFloat(kpi(0));
+    ok("KPI total head computed", H0 > 5, kpi(0));
+    ok("3 KPIs (head / motor input / motor size)", D.querySelectorAll(".kpi").length === 3);
+    ok("chart rendered (svg)", !!D.querySelector(".res-chart svg path"));
+
+    // REC pattern
+    const T = $("f_T");
+    ok("temperature blank shows REC tag", T.value === "" && !!T.parentElement.querySelector(".rec-tag"));
+    setIn(T, "30"); await sleep(50);
+    ok("typed value removes REC tag", !T.parentElement.querySelector(".rec-tag") && /Recommended/.test(T.closest(".in-field").querySelector(".in-help").textContent));
+    ok("typed temperature updates the shared fluid", Math.abs(W.RO.fluid.get().T_C - 30) < 1e-9);
+    setIn(T, ""); await sleep(50);
+    ok("clearing restores REC", !!T.parentElement.querySelector(".rec-tag"));
+
+    // segment edit changes results
+    const L = D.querySelector('[data-seg="discharge:1:L_m"]');
+    setIn(L, "1100"); await sleep(80);
+    ok("longer main raises total head", parseFloat(kpi(0)) > H0, `${H0} → ${kpi(0)}`);
+    ok("segment velocity cell filled", parseFloat(D.querySelector('[data-out="discharge:1:V"]').textContent) > 0);
+
+    // fittings: pick segment, add from library, stepper, override
+    D.querySelector('[data-act="fitsel"][data-key="discharge:1"]').click(); await sleep(80);
+    const add = D.querySelector('[data-act-select="fadd"]');
+    const nBefore = mod.getState().state.routes.discharge.segments[1].fittings.length;
+    add.value = "GATE"; fire(add, "change"); await sleep(120);
+    const fits = mod.getState().state.routes.discharge.segments[1].fittings;
+    ok("fitting added from library", fits.length === nBefore + 1 && fits[fits.length - 1].code === "GATE");
+    D.querySelector(`[data-act="finc"][data-key="discharge:1"][data-j="${fits.length - 1}"]`).click(); await sleep(80);
+    ok("qty stepper +1", mod.getState().state.routes.discharge.segments[1].fittings[fits.length - 1].qty === 2);
+    const kin = D.querySelector(`[data-fit="discharge:1:${fits.length - 1}:k"]`);
+    setIn(kin, "0.5"); await sleep(80);
+    ok("K override stored and K×qty = 1.00", mod.getState().state.routes.discharge.segments[1].fittings[fits.length - 1].k === 0.5 &&
+       D.querySelector(`[data-out="discharge:1:f${fits.length - 1}:Kq"]`).textContent === "1.00", D.querySelector(`[data-out="discharge:1:f${fits.length - 1}:Kq"]`).textContent);
+
+    // add segment
+    const segN = mod.getState().state.routes.discharge.segments.length;
+    D.querySelector('[data-act="addseg"][data-side="discharge"]').click(); await sleep(80);
+    ok("segment added", mod.getState().state.routes.discharge.segments.length === segN + 1);
+
+    // units
+    const Hsi = parseFloat(kpi(0));
+    $("u-imp").click(); await sleep(150);
+    ok("Imperial: design flow input in gpm", Math.abs(parseFloat($("f_Qd").value) - 6604.3) < 0.2, $("f_Qd").value);
+    ok("Imperial: head KPI in ft", Math.abs(parseFloat(kpi(0)) - Hsi * 3.28084) < 0.15 && /ft/.test(D.querySelector(".kpi .kpi-u").textContent), kpi(0));
+    ok("stored state stays SI", mod.getState().state.flow.Q_design === 1500);
+    setIn($("f_Qd"), "7000"); await sleep(80);
+    ok("Imperial input parsed back to SI", Math.abs(mod.getState().state.flow.Q_design - 7000 / 4.402868) < 1e-6);
+    $("u-si").click(); await sleep(150);
+    setIn($("f_Qd"), "1500"); await sleep(80);
+    ok("SI restored", $("f_Qd").value === "1500" && /m/.test(D.querySelector(".kpi .kpi-u").textContent));
+
+    // save on this device
+    D.querySelector('[data-act="savedraft"]').click(); await sleep(80);
+    ok("draft saved on this device", !!W.localStorage.getItem("rocalc.intake.draft") && /Local draft/.test($("page-mod-actions").textContent));
+
+    // pages
+    D.querySelector('#hdr-tabs button.tab[data-tab="gravity"]').click(); await sleep(200);
+    ok("gravity page title", $("page-title").textContent === "Intake gravity line");
+    ok("gravity KPIs", /MARGIN|Margin/i.test(D.querySelector(".kpi .kpi-l").textContent));
+    D.querySelector('#hdr-tabs button.tab[data-tab="selection"]').click(); await sleep(300);
+    D.querySelector('[data-act="examplepump"]').click(); await sleep(600);
+    ok("example pump selected", !!mod.getState().state.selection.pumpId);
+    ok("selection checks rendered", D.querySelectorAll(".res-check").length >= 4, D.querySelectorAll(".res-check").length);
+    D.querySelector('#hdr-tabs button.tab[data-tab="surge"]').click(); await sleep(250);
+    ok("surge per-segment table", D.querySelectorAll('[data-out="surgetable"] tbody tr').length >= 2);
+    D.querySelector('#hdr-tabs button.tab[data-tab="steps"]').click(); await sleep(250);
+    ok("calculation steps rendered", D.querySelectorAll(".step").length > 10, D.querySelectorAll(".step").length);
+
+    // arrangement
+    D.querySelector('#hdr-tabs button.tab[data-tab="sizing"]').click(); await sleep(200);
+    const arr = D.querySelector('[data-sel="arrangement"]');
+    arr.value = "gravity_only"; fire(arr, "change"); await sleep(250);
+    const tabs = [...D.querySelectorAll("#hdr-tabs nav:not([hidden]) button.tab")].map(b => b.dataset.tab);
+    ok("gravity_only hides pump pages", !tabs.includes("sizing") && !tabs.includes("selection"), tabs.join(","));
+    const arr2 = D.querySelector('[data-sel="arrangement"]'); arr2.value = "gravity_pumps"; fire(arr2, "change"); await sleep(250);
+
+    // state round trip
+    const st = mod.getState();
+    mod.reset(); await sleep(150);
+    ok("reset restores defaults", mod.getState().state.routes.discharge.segments[1].L_m === 550);
+    mod.importJson({ module: "intake", state: st.state, fluid: W.RO.fluid.get() }); await sleep(200);
+    ok("import restores edited route", mod.getState().state.routes.discharge.segments[1].L_m === 1100);
+
+    // shell: expand sidebar, roadmap, palette navigation, alerts, sign-in
+    D.querySelector('[data-act="expand"]').click(); await sleep(100);
+    ok("sidebar expands", !$("side").hidden && $("rail").hidden);
+    ok("expanded state persisted", JSON.parse(W.localStorage.getItem("roshell.prefs")).expanded === true);
+    const rm = D.querySelector('[data-act="roadmap"]'); rm.checked = true; fire(rm, "change"); await sleep(80);
+    ok("roadmap shows planned pages", D.querySelectorAll(".side-item.soon").length > 10);
+    D.querySelector('.side-item[data-go="production"]').click(); await sleep(250);
+    ok("coming-soon page", W.location.hash === "#/soon/production" && !$("page-soon-tag").hidden);
+    D.dispatchEvent(new W.KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })); await sleep(80);
+    const q = $("pal-q");
+    ok("Ctrl K opens the palette", !!q);
+    q.value = "fittings"; fire(q, "input"); await sleep(80);
+    $("pal-q").dispatchEvent(new W.KeyboardEvent("keydown", { key: "Enter", bubbles: true })); await sleep(400);
+    ok("palette navigates to Libraries › Fittings", W.location.hash === "#/libraries/fittings" && $("page-title").textContent === "Fittings", W.location.hash + " " + $("page-title").textContent);
+    $("alerts-btn").click(); await sleep(300);
+    ok("alerts panel opens", !!D.querySelector(".pop-alerts .al-head"));
+    D.querySelector('[data-act="close"]').click(); await sleep(80);
+    $("guest-signin").click(); await sleep(100);
+    D.getElementById("lg-user").value = "nobody"; D.getElementById("lg-pass").value = "wrong-password";
+    [...D.querySelectorAll(".modal-actions .btn")].find(b => b.textContent === "Sign in").click(); await sleep(600);
+    ok("bad sign-in shows an error", /Invalid|Too many/.test(D.getElementById("lg-err").textContent), D.getElementById("lg-err").textContent);
+    D.querySelector(".modal-x").click();
+
+    // tools in imperial
+    $("u-imp").click(); W.location.hash = "#/tools/velocity"; await sleep(400);
+    ok("tools velocity in ft/s", /ft\/s/.test($("tl_status").textContent), $("tl_status").textContent);
+    $("u-si").click(); await sleep(100);
+
+    // pipeline design (Tools › Pipeline design, PRD §8A)
+    W.location.hash = "#/pipeline/profile"; await sleep(600);
+    const pl = W.RO.app.modules().find(m => m.id === "pipeline");
+    const PR = pl._ctx.root, PA = pl._ctx.actions, Q = sel => PR.querySelector(sel), QA = sel => [...PR.querySelectorAll(sel)];
+    const pk = i => PR.querySelectorAll(".kpi .kpi-v")[i].textContent.replace(/,/g, "");
+    ok("pipeline: page title + breadcrumb", $("page-title").textContent === "Pipeline profile" && /Tools\s*\/\s*Pipeline design\s*\/\s*Profile/.test($("crumbs").textContent), $("page-title").textContent + " | " + $("crumbs").textContent);
+    const P0 = parseFloat(pk(0));
+    ok("pipeline: inlet pressure KPI", P0 > 0, pk(0));
+    ok("pipeline: profile chart with air valve marker", !!Q(".res-chart svg path") && /AV/.test(Q(".res-chart svg").textContent));
+    ok("pipeline: cover field REC", !!Q('[data-fwrap="cover"] .rec-tag'));
+    const gnd = Q('[data-prof="2:ground"]'); setIn(gnd, "30"); await sleep(120);
+    ok("pipeline: raised ridge → sub-atmospheric check", QA(".res-check").some(c => /sub-atmospheric/.test(c.textContent) && /CHECK/.test(c.textContent)));
+    setIn(Q('[data-prof="2:ground"]'), "14"); await sleep(120);
+    const sub = D.querySelector("[data-submerged]"); sub.checked = true; fire(sub, "change"); await sleep(120);
+    ok("pipeline: submerged → no air-valve check", !QA(".res-check").some(c => /Air release/.test(c.textContent)) && QA(".res-check").some(c => /Submerged line/.test(c.textContent)));
+    sub.checked = false; fire(sub, "change"); await sleep(120);
+    Q('[data-act="ppaste"]').click(); await sleep(150);
+    D.querySelector(".modal textarea").value = ["Chainage (m)\tGround (m)\tLabel", "0\t5\tA", "500\t9\tB", "1000\t6\tC"].join("\n");
+    [...D.querySelectorAll(".modal-actions .btn")].find(b => /Replace profile/.test(b.textContent)).click(); await sleep(200);
+    // typing a reach length digit by digit moves the later points and keeps the line valid
+    const plSave = JSON.stringify(pl.getState().state.profile);
+    const lenIn = Q('[data-prof="2:len"]');
+    for (const s of ["3", "30", "300", "3000"]) { lenIn.value = s; fire(lenIn, "input"); await sleep(30); }
+    ok("pipeline: Length column — reach 2 to 3000 m, later points shift, results stay", pl.getState().state.profile[2].x - pl.getState().state.profile[1].x === 3000 &&
+       !QA(".res-check").some(c => /chainage must increase|beyond the profile end/.test(c.textContent)) && pk(0) > 0 && Q('[data-prof="2:x"]').value === String(pl.getState().state.profile[2].x),
+       JSON.stringify(pl.getState().state.profile.map(p => p.x)));
+    ok("pipeline: pipe sizes shown on the Profile page", /OD 500/.test(Q('[data-out="pipesum"]').textContent));
+    pl.setState({ state: Object.assign(pl.getState().state, { profile: JSON.parse(plSave) }) }); await sleep(150);
+    ok("pipeline: paste from Excel replaces the profile", pl.getState().state.profile.length === 3 && pl.getState().state.profile[1].ground === 9);
+    $("u-imp").click(); await sleep(200);
+    ok("pipeline: Imperial chainage in ft", Math.abs(parseFloat(Q('[data-prof="1:x"]').value) - 500 * 3.28084) < 0.2, Q('[data-prof="1:x"]').value);
+    $("u-si").click(); await sleep(200);
+    pl._ctx.tabs.querySelector('button.tab[data-tab=\"segments\"]').click(); await sleep(250);
+    ok("pipeline: segments page", $("page-title").textContent === "Pipeline segments & fittings");
+    Q('[data-act="sadd"]').click(); await sleep(150);
+    ok("pipeline: + Segment splits the last range", pl.getState().state.segments.length === 3 && pl.getState().state.segments[1].x1 === 700, JSON.stringify(pl.getState().state.segments.map(s => s.x1)));
+    const fad = Q('[data-act-select="fadd"]'); fad.value = "GATE"; fire(fad, "change"); await sleep(150);
+    const fl = pl.getState().state.segments[0].fittings, jj = fl.length - 1;
+    setIn(Q(`[data-fit="0:${jj}:x"]`), "100"); await sleep(120);
+    ok("pipeline: fitting located at a chainage", pl.getState().state.segments[0].fittings[jj].x === 100);
+    pl._ctx.tabs.querySelector('button.tab[data-tab=\"compare\"]').click(); await sleep(300);
+    const use = Q('[data-act="useod"]'), od = +use.dataset.od; use.click(); await sleep(250);
+    ok("pipeline: diameter comparison → Use", pl.getState().state.segments.every(s => s.dn === od), od);
+    pl._ctx.tabs.querySelector('button.tab[data-tab=\"pressures\"]').click(); await sleep(250);
+    ok("pipeline: pressure table rows", PR.querySelectorAll('[data-out="sttable"] tbody tr').length >= 4);
+    pl._ctx.tabs.querySelector('button.tab[data-tab=\"steps\"]').click(); await sleep(250);
+    ok("pipeline: calculation steps", PR.querySelectorAll("#pl-steps > *").length > 8, PR.querySelectorAll("#pl-steps > *").length);
+    pl._ctx.tabs.querySelector('button.tab[data-tab=\"profile\"]').click(); await sleep(250);
+    const gm = Q('input[data-mode][value="gravity"]'); gm.checked = true; fire(gm, "change"); await sleep(250);
+    setIn($("pl_sl"), "40"); await sleep(150);
+    ok("pipeline: gravity mode KPIs", /Margin/i.test(Q(".kpi .kpi-l").textContent) && parseFloat(pk(1)) > 0, Q(".kpi .kpi-l").textContent + " " + pk(1));
+    PA.querySelector('[data-act="savedraft"]').click(); await sleep(100);
+    ok("pipeline: draft saved on this device", !!W.localStorage.getItem("rocalc.pipeline.draft"));
+    PA.querySelector('[data-act="send"]').click(); await sleep(200);
+    ok("pipeline: send dialog defaults to the gravity line", D.querySelector('input[name="pl-target"]:checked').value === "gravity");
+    [...D.querySelectorAll(".modal-actions .btn")].find(b => /Replace/.test(b.textContent)).click(); await sleep(800);
+    const ist = mod.getState().state;
+    ok("send to Intake: gravity route replaced + profile kept", W.location.hash === "#/intake/gravity" && ist.routes.gravity.segments.length === 3 && !!ist.routes.gravity.profile && ist.routes.gravity.segments[0].dn === od,
+       W.location.hash + " " + ist.routes.gravity.segments.length);
+    ok("send to Intake: profile view shown", !!D.querySelector(".in-profile svg"));
+
+    // supports & buoyancy (Phase 2)
+    W.location.hash = "#/buoyancy/sections"; await sleep(600);
+    const by = W.RO.app.modules().find(m => m.id === "buoyancy"), BR = by._ctx.root, BQ = s => BR.querySelector(s);
+    const bk = i => parseFloat(BR.querySelectorAll(".kpi .kpi-v")[i].textContent.replace(/,/g, ""));
+    ok("buoyancy: page title", $("page-title").textContent === "Supports & buoyancy" && /Design\s*\/\s*Supports/.test($("crumbs").textContent), $("page-title").textContent);
+    ok("buoyancy: default section passes SF 1.5", bk(0) >= 1.5 && [...BR.querySelectorAll(".res-check")].some(c => /SF .* ≥ 1\.50/.test(c.textContent)), bk(0));
+    setIn(BQ("#bs_piece_kg"), "800"); await sleep(150);
+    ok("buoyancy: lighter blocks → SF below target (CHECK)", bk(0) < 1.5 && [...BR.querySelectorAll(".res-check")].some(c => /CHECK/.test(c.textContent) && /SF/.test(c.textContent)), bk(0));
+    BQ('[data-act="usereq"]').click(); await sleep(200);
+    ok("buoyancy: 'Use … pieces' restores SF ≥ target", bk(0) >= 1.5, bk(0));
+    const nSec = by.getState().state.sections.length;
+    BQ('[data-act="fromintake"]').click(); await sleep(300);
+    ok("buoyancy: sections added from the Intake gravity line", by.getState().state.sections.length > nSec, by.getState().state.sections.length);
+    const defSel = BQ("#by_def"); defSel.value = "B"; fire(defSel, "change"); await sleep(200);
+    ok("buoyancy: criterion switch to method B", /Method B/.test(BQ(".res-head .dim").textContent));
+    const dsel = BQ("#by_def"); dsel.value = "A"; fire(dsel, "change"); await sleep(150);
+    // bill of materials
+    W.location.hash = "#/bom"; await sleep(700);
+    const bm = W.RO.app.modules().find(m => m.id === "bom"), MR = bm._ctx.root;
+    ok("bom: page title", $("page-title").textContent === "Bill of materials");
+    const net0 = parseFloat(MR.querySelector(".res-table td.r").textContent.replace(/,/g, ""));
+    ok("bom: pipes from the Intake route", MR.querySelectorAll(".in-sec")[2].querySelectorAll("tbody tr").length >= 1 && net0 > 0, net0);
+    ok("bom: blocks from Supports & buoyancy", /Concrete block/.test(MR.querySelectorAll(".in-sec")[6].textContent));
+    const pcb = MR.querySelector('[data-src="pipeline"]'); pcb.checked = true; fire(pcb, "change"); await sleep(250);
+    const net1 = parseFloat(MR.querySelector(".res-table td.r").textContent.replace(/,/g, ""));
+    ok("bom: ticking Pipeline design adds its line", net1 > net0, `${net0} → ${net1}`);
+    const pcb2 = MR.querySelector('[data-src="pipeline"]'); pcb2.checked = false; fire(pcb2, "change"); await sleep(200);
+    ok("bom: flanged items listed", /Stub end|Gasket/.test(MR.querySelectorAll(".in-sec")[5].textContent));
+
+    // pretreatment (Phase 3)
+    W.location.hash = "#/pretreat/overview"; await sleep(700);
+    const pt = W.RO.app.modules().find(m => m.id === "pretreat"), TR = pt._ctx.root, TT = pt._ctx.tabs, TQ = s => TR.querySelector(s);
+    const tk = i => parseFloat(TR.querySelectorAll(".kpi .kpi-v")[i].textContent.replace(/,/g, ""));
+    const tabIds = () => [...TT.querySelectorAll("button.tab")].map(b => b.dataset.tab);
+    ok("pretreat: overview title + train", $("page-title").textContent === "Pretreatment" && TR.querySelectorAll("[data-train]").length === 6, $("page-title").textContent);
+    const dafBox = TQ('[data-train="1"]'); dafBox.checked = false; fire(dafBox, "change"); await sleep(200);
+    ok("pretreat: removing DAF removes its page", !tabIds().includes("daf"), tabIds().join(","));
+    const bagBox = TQ('[data-train="4"]'); bagBox.checked = true; fire(bagBox, "change"); await sleep(200);
+    ok("pretreat: including bag filters adds their page", tabIds().includes("bag"), tabIds().join(","));
+    TQ('[data-act="tup"][data-i="4"]').click(); await sleep(200);
+    ok("pretreat: steps can be reordered", pt.getState().state.train[3].id === "bag");
+    TT.querySelector('button.tab[data-tab="media"]').click(); await sleep(300);
+    const nF = tk(0);
+    ok("pretreat: media filters auto-counted (N−1 ≤ 12.5 m/h)", nF > 1 && tk(1) <= 12.5, `${nF} / ${tk(1)}`);
+    setIn(TQ("#pt_media_rate_normal"), "12"); await sleep(200);
+    ok("pretreat: higher normal rate → fewer filters", tk(0) < nF, `${nF} → ${tk(0)}`);
+    const ms = TQ("#pts_media_media"); ms.value = "tri"; fire(ms, "change"); await sleep(200);
+    ok("pretreat: tri-media adds garnet and target 1250", !!TQ("#pt_media_garnet_depth") && /1250/.test(TR.textContent));
+    TT.querySelector('button.tab[data-tab="cartridge"]').click(); await sleep(300);
+    const nE = tk(0);
+    setIn(TQ("#pt_cartridge_q10"), "0.5"); await sleep(200);
+    ok("pretreat: lower flow per 10\" → more cartridge elements", tk(0) > nE, `${nE} → ${tk(0)}`);
+    TT.querySelector('button.tab[data-tab="bag"]').click(); await sleep(300);
+    const bp = TQ('[data-pick="bag.element"]'); bp.value = "g8"; fire(bp, "change"); await sleep(200);
+    ok("pretreat: bag element picked from the equipment list", pt.getState().state.bag.element.id === "g8" && /25 µm/.test(TR.querySelector(".res-head").textContent));
+    TT.querySelector('button.tab[data-tab="dosing"]').click(); await sleep(300);
+    const nChk = TR.querySelectorAll(".res-check .tag-outline").length;
+    setIn(TQ('[data-chem="1:days"]'), "30"); await sleep(200);
+    ok("pretreat: storage days (site) give a tank volume", /30 d/.test(TQ('[data-out="chemtable"]').textContent) && TR.querySelectorAll(".res-check .tag-outline").length === nChk - 1);
+    // equipment list (Libraries › Equipment): guest adds a session entry that appears in the picker
+    W.location.hash = "#/libraries/equipment"; await sleep(600);
+    ok("equipment library page", $("page-title").textContent === "Equipment" && D.querySelectorAll("#lib-eq tbody tr").length >= 5, $("page-title").textContent);
+    await W.RO.equiplib.list();
+    W.RO.equiplib.saveSession({ category: "mmf_vessel", vendor: "TestVendor", model: "TV-2800", specs: { orientation: "vertical", diameter_m: 2.8 } });
+    await W.RO.equiplib.list(); await sleep(200);
+    ok("equipment: session entry listed", /TV-2800/.test(D.getElementById("lib-eq").textContent));
+    W.location.hash = "#/pretreat/media"; await sleep(600);
+    ok("equipment: new vessel offered on the media page", [...TR.querySelectorAll('[data-pick="media.vessel"] option')].some(o => /TV-2800/.test(o.textContent)));
+
+    // PDF toolkit (Tools, browser port of legacy/pdf_modifier)
+    W.location.hash = "#/pdftools"; await sleep(600);
+    const pm = W.RO.app.modules().find(m => m.id === "pdftools"), PA2 = pm.api, PR2 = pm._ctx.root;
+    ok("pdf: page title under Tools", $("page-title").textContent === "PDF toolkit" && /Tools/.test($("crumbs").textContent), $("page-title").textContent);
+    const { PDFLib } = await PA2.ensureLibs();
+    const mk = async (sizes) => { const d = await PDFLib.PDFDocument.create(); sizes.forEach(([w, h]) => d.addPage(W.Array.of(w, h))); return d.save(); };
+    const fA = new W.File([await mk([[300, 400], [310, 400], [320, 400]])], "a.pdf", { type: "application/pdf" });
+    const fB = new W.File([await mk([[500, 400], [510, 400]])], "b.pdf", { type: "application/pdf" });
+    const fBad = new W.File([new TextEncoder().encode("not a pdf")], "bad.pdf", { type: "application/pdf" });
+    await PA2.addFiles([fA, fB, fBad]);
+    ok("pdf: 5 pages from 2 files; bad file reported", PA2.pages().length === 5 && /bad\.pdf/.test(PR2.querySelector("#pdf-status").textContent), PR2.querySelector("#pdf-status").textContent);
+    ok("pdf: thumbnails rendered", PR2.querySelectorAll(".pdf-card img").length === 5 && PR2.querySelector(".pdf-card img").naturalWidth >= 0);
+    PA2.move(4, 0);                                   // b p.2 first
+    PR2.querySelector(`[data-pact="right"][data-uid="${PA2.pages()[1].uid}"]`).click();   // rotate a p.1 by 90
+    PR2.querySelector(`[data-pact="del"][data-uid="${PA2.pages()[2].uid}"]`).click();     // delete a p.2
+    const outBytes = await PA2.buildPdf(PA2.pages());
+    const outDoc = await PDFLib.PDFDocument.load(outBytes);
+    ok("pdf: merged output keeps order, rotation and deletions", outDoc.getPageCount() === 4 && Math.round(outDoc.getPage(0).getWidth()) === 510 &&
+       Math.round(outDoc.getPage(1).getWidth()) === 300 && outDoc.getPage(1).getRotation().angle === 90 && Math.round(outDoc.getPage(2).getWidth()) === 320,
+       [outDoc.getPageCount(), outDoc.getPages().map(p => Math.round(p.getWidth()) + "/" + p.getRotation().angle).join(",")]);
+    const z = PA2.zip([{ name: "x_001.pdf", data: new Uint8Array([1, 2, 3]) }, { name: "x_002.pdf", data: outBytes }]);
+    const dv = new DataView(z.buffer), eocd = z.length - 22;
+    ok("pdf: split ZIP has 2 entries and valid CRC", dv.getUint32(0, true) === 0x04034b50 && dv.getUint32(eocd, true) === 0x06054b50 && dv.getUint16(eocd + 10, true) === 2 && dv.getUint32(14, true) === PA2.crc32(new Uint8Array([1, 2, 3])));
+    ok("pdf: CRC-32 reference value", PA2.crc32(new TextEncoder().encode("123456789")) === 0xCBF43926);
+    PR2.querySelector(".pdf-select").click(); await sleep(50);
+    ok("pdf: selecting a page updates the page line", /1 selected/.test(pm._ctx.meta.textContent), pm._ctx.meta.textContent);
+
+    // narrow: drawer
+    frame.style.width = "1000px"; W.dispatchEvent(new W.Event("resize")); await sleep(300);
+    ok("narrow: hamburger shown, rail/sidebar hidden", !$("btn-drawer").hidden && $("rail").hidden && $("side").hidden);
+    $("btn-drawer").click(); await sleep(100);
+    ok("drawer opens over content", !$("side").hidden && $("side").classList.contains("drawer") && !$("drawer-scrim").hidden);
+    $("drawer-scrim").click(); await sleep(100);
+    ok("scrim closes drawer", $("side").hidden);
+  } catch (e) { fails++; out.push("EXCEPTION " + e.stack); }
+  out.unshift(`=== ${fails} failure(s) ===`);
+  document.getElementById("out").textContent = out.join("\n");
+  document.title = "DONE";
+}, { once: true });
+</script></body></html>

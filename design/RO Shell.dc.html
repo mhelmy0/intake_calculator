@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-6bda72f7-3b64-413b-82e1-abfa61a2fbf2/styles.css">
+<script src="_ds/industry-6bda72f7-3b64-413b-82e1-abfa61a2fbf2/_ds_bundle.js"></script>
+<style>html,body{margin:0;height:100%}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}input.input::placeholder{color:var(--color-accent-600);opacity:1}</style>
+</helmet>
+<div ref="{{ rootRef }}" data-screen-label="RO shell" style="position:relative;display:flex;height:{{ rootH }};overflow:hidden;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:14px;line-height:1.5">
+
+  <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+    <nav aria-label="Main" style="flex:none;width:56px;border-right:1px solid var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:4px">
+      <button onClick="{{ expand }}" title="RO Workbench — expand navigation" style="width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent-700);cursor:pointer;margin-bottom:10px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+      </button>
+      <sc-for list="{{ railAreas }}" as="a" hint-placeholder-count="5">
+        <button onClick="{{ a.open }}" title="{{ a.label }}" aria-label="{{ a.label }}" style="width:40px;height:40px;display:grid;place-items:center;border:0;cursor:pointer;background:{{ a.bg }};color:{{ a.fg }}" style-hover="background:var(--color-accent-100);color:var(--color-accent-800)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><sc-for list="{{ a.paths }}" as="d"><path d="{{ d }}"></path></sc-for></svg>
+        </button>
+      </sc-for>
+      <div style="flex:1"></div>
+      <button onClick="{{ expand }}" title="Expand navigation" aria-label="Expand navigation" style="width:40px;height:40px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--color-neutral-700)" style-hover="background:var(--color-accent-100)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M9 3v18"></path><path d="m14 9 3 3-3 3"></path></svg>
+      </button>
+    </nav>
+  </sc-if>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePop }}" style="position:absolute;inset:0;z-index:40;background:color-mix(in srgb, var(--color-neutral-900) 40%, transparent)"></div>
+  </sc-if>
+
+  <sc-if value="{{ showSide }}" hint-placeholder-val="{{ false }}">
+    <nav aria-label="Main" style="position:{{ sidePos }};z-index:41;top:0;bottom:0;left:0;flex:none;width:264px;height:100%;border-right:1px solid var(--color-divider);background:var(--color-bg);display:flex;flex-direction:column;box-shadow:{{ sideShadow }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 10px 10px 8px;height:56px">
+        <div style="width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--color-accent);color:var(--color-accent-700);flex:none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+        </div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:19px;letter-spacing:-0.01em;flex:1">RO Workbench</div>
+        <button onClick="{{ collapse }}" title="Collapse navigation" aria-label="Collapse navigation" style="width:36px;height:36px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--color-neutral-700)" style-hover="background:var(--color-accent-100)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg>
+        </button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:4px 8px 12px">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
+          <div style="margin-bottom:2px">
+            <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" style="width:100%;display:flex;align-items:center;gap:10px;height:{{ rowH }};padding:0 8px;border:0;background:transparent;cursor:pointer;color:{{ g.fg }};font:inherit;font-size:14px;font-weight:500;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 6%, transparent)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><sc-for list="{{ g.paths }}" as="d"><path d="{{ d }}"></path></sc-for></svg>
+              <span style="flex:1">{{ g.label }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ g.rot }});color:var(--color-neutral-600)"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+            <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:1px;padding:2px 0 6px">
+                <sc-for list="{{ g.items }}" as="it">
+                  <button onClick="{{ it.go }}" aria-current="{{ it.current }}" style="display:flex;align-items:center;gap:8px;height:{{ itemH }};padding:0 8px 0 36px;border:0;cursor:pointer;font:inherit;font-size:14px;text-align:left;background:{{ it.bg }};color:{{ it.fg }};font-weight:{{ it.weight }}" style-hover="background:var(--color-accent-100);color:var(--color-accent-800)">
+                    <span style="flex:1">{{ it.label }}</span>
+                    <sc-if value="{{ it.soon }}"><span class="tag tag-neutral" style="font-size:10px;padding:1px 6px">Soon</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border-top:1px solid var(--color-divider);padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked="{{ roadmap }}" onChange="{{ toggleRoadmap }}" style="width:16px;height:16px;accent-color:var(--color-accent);margin:0">
+          <span style="flex:1">Show roadmap</span>
+          <span style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ soonCount }} planned</span>
+        </label>
+      </div>
+    </nav>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px 0 12px;border-bottom:1px solid var(--color-divider)">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ openDrawer }}" aria-label="Open navigation" style="width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--color-text)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+        </button>
+      </sc-if>
+      <button onClick="{{ openSwitcher }}" aria-haspopup="dialog" style="display:flex;align-items:center;gap:10px;height:42px;padding:0 10px;border:1px solid var(--color-divider);background:transparent;cursor:pointer;font:inherit;text-align:left;color:var(--color-text);max-width:340px;min-width:0" style-hover="border-color:var(--color-accent);background:var(--color-accent-100)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--color-accent-700)"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m2 12 8.58 3.91a2 2 0 0 0 1.66 0L21 12"></path><path d="m2 17 8.58 3.91a2 2 0 0 0 1.66 0L21 17"></path></svg>
+        <span style="display:flex;flex-direction:column;min-width:0;line-height:1.2">
+          <span style="font-size:11px;color:var(--color-neutral-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ctxProject }}</span>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:15px;white-space:nowrap">{{ ctxPlantTrain }}</span>
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--color-neutral-600)"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+      <button onClick="{{ openPalette }}" style="display:flex;align-items:center;gap:8px;height:42px;padding:0 10px;border:1px solid var(--color-divider);background:var(--color-surface);cursor:pointer;font:inherit;color:var(--color-neutral-700);flex:0 1 320px;min-width:44px" style-hover="border-color:var(--color-accent)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Search pages and actions</span>
+        <kbd style="font-family:var(--font-body);font-size:11px;border:1px solid var(--color-divider);padding:1px 6px;color:var(--color-neutral-700);white-space:nowrap;flex:none">Ctrl K</kbd>
+      </button>
+      <div style="flex:1"></div>
+      <div class="seg" role="radiogroup" aria-label="Units">
+        <label class="seg-opt" style="padding:6px 10px"><input type="radio" name="units-{{ uid }}" checked="{{ isSI }}" onChange="{{ setSI }}">SI</label>
+        <label class="seg-opt" style="padding:6px 10px"><input type="radio" name="units-{{ uid }}" checked="{{ isImp }}" onChange="{{ setImp }}">Imperial</label>
+      </div>
+      <sc-if value="{{ isOffline }}">
+        <span class="tag" style="background:var(--color-accent-900);color:var(--color-bg);gap:6px;height:28px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"></path><path d="M8.5 16.43a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 4.18-2.65"></path><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"></path><path d="M5 12.86a10 10 0 0 1 5.17-2.7"></path><path d="m2 2 20 20"></path></svg>Offline
+        </span>
+      </sc-if>
+      <sc-if value="{{ isOnline }}">
+        <span title="All changes synced" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-neutral-700);white-space:nowrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path><path d="m9 14 2 2 4-4"></path></svg>Synced {{ syncedAt }}
+        </span>
+      </sc-if>
+      <sc-if value="{{ isGuest }}"><span class="tag tag-outline" style="height:28px">Guest</span></sc-if>
+      <button onClick="{{ openAlerts }}" aria-label="Alerts, {{ unread }} unread" style="position:relative;width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.27 21a2 2 0 0 0 3.46 0"></path><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"></path></svg>
+        <sc-if value="{{ hasUnread }}"><span style="position:absolute;top:6px;right:5px;min-width:17px;height:17px;padding:0 4px;background:var(--color-accent-900);color:var(--color-bg);font-size:11px;line-height:17px;text-align:center;font-variant-numeric:tabular-nums">{{ unread }}</span></sc-if>
+      </button>
+      <button onClick="{{ openUser }}" aria-haspopup="menu" style="display:flex;align-items:center;gap:8px;height:44px;padding:0 6px;border:0;background:transparent;cursor:pointer;font:inherit;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+        <span style="width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--color-accent);color:var(--color-accent-800);font-family:var(--font-heading);font-weight:600;font-size:13px">{{ user.initials }}</span>
+        <sc-if value="{{ wide }}"><span style="display:flex;flex-direction:column;line-height:1.15;text-align:left"><span style="font-size:13px;font-weight:500">{{ user.name }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ user.label }}</span></span></sc-if>
+      </button>
+    </header>
+
+    <sc-if value="{{ isOffline }}">
+      <div role="status" style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 20px;background:var(--color-accent-900);color:var(--color-bg);font-size:13px">
+        <strong style="font-weight:600">You're offline.</strong><span>Pages are read-only. Data shown was last synced at {{ syncedAt }}. Editing resumes when the connection returns.</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isGuest }}">
+      <div role="status" style="flex:none;display:flex;align-items:center;gap:12px;padding:8px 20px;background:var(--color-accent-100);color:var(--color-accent-800);font-size:13px;flex-wrap:wrap">
+        <span style="flex:1;min-width:240px"><strong style="font-weight:600">Guest session.</strong> Drafts are saved on this device only. Sign in to share them and submit for approval.</span>
+        <button class="btn btn-secondary" onClick="{{ signInEngineer }}" style="border-color:var(--color-accent);color:var(--color-accent-800);padding:4px 12px">Sign in</button>
+      </div>
+    </sc-if>
+
+    <main ref="{{ mainRef }}" style="flex:1;overflow-y:auto;min-height:0">
+      <div style="padding:20px 28px 56px;max-width:1640px">
+        <nav aria-label="Breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-neutral-700);margin-bottom:6px;flex-wrap:wrap">
+          <sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="3">
+            <span style="display:flex;align-items:center;gap:6px">
+              <sc-if value="{{ c.link }}"><button onClick="{{ c.go }}" style="border:0;background:transparent;padding:0;font:inherit;color:var(--color-accent-700);cursor:pointer" style-hover="text-decoration:underline">{{ c.label }}</button></sc-if>
+              <sc-if value="{{ c.plain }}"><span style="color:var(--color-text)">{{ c.label }}</span></sc-if>
+              <sc-if value="{{ c.sep }}"><span aria-hidden="true" style="color:var(--color-neutral-500)">/</span></sc-if>
+            </span>
+          </sc-for>
+        </nav>
+
+        <sc-if value="{{ isIntake }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+            <div style="flex:1;min-width:280px">
+              <h1 style="font-size:34px;margin:0 0 4px">Intake pump sizing</h1>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--color-neutral-700)">
+                <span>CALC-INT-004</span><span aria-hidden="true">·</span><span>{{ ctxShort }}</span><span aria-hidden="true">·</span><span>Pressure drop and pump power, Darcy–Weisbach</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;white-space:nowrap">
+              <span class="tag {{ statusTagClass }}" style="height:28px;gap:6px">{{ statusLabel }}</span>
+              <sc-if value="{{ savedAt }}"><span style="font-size:12px;color:var(--color-neutral-700)">{{ savedAt }}</span></sc-if>
+              <button class="btn btn-secondary" onClick="{{ saveDraft }}" disabled="{{ cantSave }}" style="min-height:40px">{{ saveLabel }}</button>
+              <sc-if value="{{ showSubmit }}">
+                <button class="btn btn-primary blueprint" onClick="{{ submit }}" disabled="{{ cantSubmit }}" title="{{ submitTitle }}" style="min-height:40px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Submit for approval</button>
+              </sc-if>
+              <sc-if value="{{ showApprove }}">
+                <button class="btn btn-secondary" onClick="{{ returnDraft }}" style="min-height:40px">Return to draft</button>
+                <button class="btn btn-primary blueprint" onClick="{{ approve }}" style="min-height:40px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Approve</button>
+              </sc-if>
+            </div>
+          </div>
+
+          <sc-if value="{{ readOnlyNote }}">
+            <div style="margin-bottom:18px;font-size:13px;color:var(--color-accent-800);display:flex;gap:8px;align-items:center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>{{ readOnlyNote }}
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+            <div style="flex:1 1 560px;min-width:0;display:flex;flex-direction:column;gap:28px">
+              <sc-for list="{{ sections }}" as="s" hint-placeholder-count="3">
+                <section class="blueprint" style="padding:18px 20px 20px">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
+                    <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ s.num }}</span>
+                    <h2 style="font-size:20px;margin:0">{{ s.title }}</h2>
+                  </div>
+                  <sc-if value="{{ s.hasMaterial }}">
+                    <div class="field" style="margin-bottom:14px;max-width:320px">
+                      <label>Pipe material</label>
+                      <select class="input" value="{{ material }}" onChange="{{ setMaterial }}" disabled="{{ locked }}">
+                        <sc-for list="{{ materials }}" as="m"><option value="{{ m }}">{{ m }}</option></sc-for>
+                      </select>
+                    </div>
+                  </sc-if>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px 18px">
+                    <sc-for list="{{ s.fields }}" as="f">
+                      <div class="field">
+                        <label style="display:flex;justify-content:space-between;gap:8px"><span>{{ f.label }}</span><span style="color:var(--color-neutral-600)">{{ f.unit }}</span></label>
+                        <div style="position:relative">
+                          <input class="input" inputmode="decimal" aria-label="{{ f.label }}" value="{{ f.value }}" placeholder="{{ f.placeholder }}" onChange="{{ f.onChange }}" disabled="{{ locked }}" style="font-variant-numeric:tabular-nums;padding-right:52px;min-height:40px;border-color:{{ f.border }}">
+                          <sc-if value="{{ f.showRec }}"><span class="tag tag-accent" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;padding:1px 6px;letter-spacing:0.06em;pointer-events:none">REC</span></sc-if>
+                        </div>
+                        <div style="font-size:12px;margin-top:5px;color:{{ f.helpColor }};text-wrap:pretty;min-height:18px">{{ f.helper }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </section>
+              </sc-for>
+
+              <section class="blueprint" style="padding:18px 20px 20px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+                  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">04</span>
+                  <h2 style="font-size:20px;margin:0;flex:1">Fittings</h2>
+                  <span style="font-size:12px;color:var(--color-neutral-700)">K values from Fittings library v14</span>
+                </div>
+                <table class="table">
+                  <thead><tr><th>Fitting</th><th style="text-align:right">K</th><th style="text-align:center;width:130px">Qty</th><th style="text-align:right">K × qty</th><th style="width:40px"></th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ fittingRows }}" as="r" hint-placeholder-count="6">
+                      <tr>
+                        <td>{{ r.name }}</td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.k }}</td>
+                        <td style="text-align:center">
+                          <div style="display:inline-flex;align-items:center;border:1px solid var(--color-divider)">
+                            <button onClick="{{ r.dec }}" disabled="{{ locked }}" aria-label="Fewer" style="width:32px;height:30px;border:0;background:transparent;cursor:pointer;font:inherit;color:var(--color-text)" style-hover="background:var(--color-accent-100)">−</button>
+                            <span style="min-width:30px;text-align:center;font-variant-numeric:tabular-nums">{{ r.qty }}</span>
+                            <button onClick="{{ r.inc }}" disabled="{{ locked }}" aria-label="More" style="width:32px;height:30px;border:0;background:transparent;cursor:pointer;font:inherit;color:var(--color-text)" style-hover="background:var(--color-accent-100)">+</button>
+                          </div>
+                        </td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.kq }}</td>
+                        <td style="text-align:right"><button onClick="{{ r.remove }}" disabled="{{ locked }}" aria-label="Remove {{ r.name }}" style="width:30px;height:30px;border:0;background:transparent;cursor:pointer;color:var(--color-neutral-700)" style-hover="color:var(--color-text);background:var(--color-accent-100)">×</button></td>
+                      </tr>
+                    </sc-for>
+                    <tr><td style="font-weight:500">Total ΣK</td><td></td><td></td><td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{ sumK }}</td><td></td></tr>
+                  </tbody>
+                </table>
+                <div class="field" style="margin-top:14px;max-width:320px">
+                  <label>Add from library</label>
+                  <select class="input" value="" onChange="{{ addFitting }}" disabled="{{ locked }}">
+                    <option value="">Choose a fitting…</option>
+                    <sc-for list="{{ fittingLib }}" as="o"><option value="{{ o.name }}">{{ o.name }} (K {{ o.k }})</option></sc-for>
+                  </select>
+                </div>
+              </section>
+            </div>
+
+            <aside style="flex:1 1 420px;min-width:0;max-width:640px;position:sticky;top:0;display:flex;flex-direction:column;gap:28px">
+              <section class="blueprint" style="padding:18px 20px 20px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px">
+                  <h2 style="font-size:20px;margin:0">Results</h2>
+                  <span style="font-size:12px;color:var(--color-neutral-700)">{{ recCountText }}</span>
+                </div>
+                <sc-if value="{{ hasResult }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--color-divider)">
+                    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+                      <div style="padding:12px 14px;border-left:{{ k.border }}">
+                        <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.label }}</div>
+                        <div style="font-family:var(--font-heading);font-weight:600;font-size:32px;line-height:1.1;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+                        <div style="font-size:12px;color:var(--color-neutral-700)">{{ k.unit }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <figure style="margin:18px 0 0">
+                    <svg viewBox="0 0 520 230" width="100%" role="img" aria-label="System curve and indicative pump curve" style="display:block;font-family:var(--font-body)">
+                      <sc-for list="{{ chart.yTicks }}" as="t"><line x1="44" x2="508" y1="{{ t.y }}" y2="{{ t.y }}" stroke="var(--color-neutral-300)" stroke-width="1"></line><text x="38" y="{{ t.ty }}" text-anchor="end" font-size="11" fill="var(--color-neutral-700)">{{ t.label }}</text></sc-for>
+                      <sc-for list="{{ chart.xTicks }}" as="t"><text x="{{ t.x }}" y="222" text-anchor="middle" font-size="11" fill="var(--color-neutral-700)">{{ t.label }}</text></sc-for>
+                      <line x1="44" x2="508" y1="200" y2="200" stroke="var(--color-neutral-600)" stroke-width="1"></line>
+                      <path d="{{ chart.pump }}" fill="none" stroke="var(--color-neutral-600)" stroke-width="1.5" stroke-dasharray="5 4"></path>
+                      <path d="{{ chart.sys }}" fill="none" stroke="var(--color-accent)" stroke-width="2"></path>
+                      <line x1="{{ chart.ox }}" x2="{{ chart.ox }}" y1="{{ chart.oy }}" y2="200" stroke="var(--color-accent-700)" stroke-width="1" stroke-dasharray="2 3"></line>
+                      <circle cx="{{ chart.ox }}" cy="{{ chart.oy }}" r="5" fill="var(--color-bg)" stroke="var(--color-accent-800)" stroke-width="2"></circle>
+                      <text x="{{ chart.lx }}" y="{{ chart.ly }}" font-size="12" fill="var(--color-accent-800)">Duty {{ chart.duty }}</text>
+                    </svg>
+                    <figcaption style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--color-neutral-700);margin-top:6px">
+                      <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:2px;background:var(--color-accent)"></span>System curve</span>
+                      <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:0;border-top:1.5px dashed var(--color-neutral-600)"></span>Indicative pump curve</span>
+                      <span>Head ({{ headUnit }}) against flow ({{ flowUnit }})</span>
+                    </figcaption>
+                  </figure>
+                  <table class="table" style="margin-top:18px">
+                    <tbody>
+                      <sc-for list="{{ resultRows }}" as="r" hint-placeholder-count="10">
+                        <tr><td style="color:{{ r.color }};font-weight:{{ r.weight }}">{{ r.label }}</td><td style="text-align:right;font-variant-numeric:tabular-nums;font-weight:{{ r.weight }}">{{ r.value }}</td><td style="width:54px;color:var(--color-neutral-700)">{{ r.unit }}</td></tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                  <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ checks }}" as="c">
+                      <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+                        <span class="tag" style="flex:none;font-size:10px;padding:1px 7px;letter-spacing:0.06em;margin-top:2px;background:{{ c.tbg }};color:{{ c.tfg }}">{{ c.tag }}</span>
+                        <span style="text-wrap:pretty">{{ c.text }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ noResult }}">
+                  <p style="margin:0;color:var(--color-neutral-700)">Enter {{ missingText }} to calculate.</p>
+                </sc-if>
+              </section>
+            </aside>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPlaceholder }}">
+          <div style="max-width:960px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+              <h1 style="font-size:34px;margin:0">{{ page.label }}</h1>
+              <span class="tag {{ phTagClass }}" style="height:26px">{{ phTag }}</span>
+            </div>
+            <p style="max-width:640px;color:var(--color-neutral-800);text-wrap:pretty">{{ phText }}</p>
+            <sc-if value="{{ isExisting }}">
+              <div class="blueprint" style="height:420px;display:grid;place-items:center;margin-top:20px;background:repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--color-text) 4%, transparent) 14px 15px)">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:13px;color:var(--color-neutral-700)">Today's {{ page.label }} page renders here</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isSoon }}">
+              <div class="blueprint" style="margin-top:20px;padding:18px 20px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:10px">{{ page.area }} roadmap</div>
+                <table class="table"><tbody>
+                  <sc-for list="{{ areaItems }}" as="it">
+                    <tr><td>{{ it.label }}</td><td style="text-align:right"><span class="tag {{ it.cls }}">{{ it.state }}</span></td></tr>
+                  </sc-for>
+                </tbody></table>
+              </div>
+              <button class="btn btn-secondary" onClick="{{ goStart }}" style="margin-top:20px;min-height:40px">Go to my start screen · {{ startLabel }}</button>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ anyPop }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePop }}" style="position:absolute;inset:0;z-index:50;background:{{ scrim }}"></div>
+  </sc-if>
+
+  <sc-if value="{{ popSwitcher }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-label="Switch project, plant and train" style="position:absolute;z-index:51;top:52px;left:{{ popLeft }};width:min(720px, calc(100% - 24px));background:var(--color-bg);border:1px solid var(--color-divider);box-shadow:var(--shadow-lg)">
+      <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr">
+        <div style="border-right:1px solid var(--color-divider);padding:10px 0">
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 14px 6px">Project</div>
+          <sc-for list="{{ swProjects }}" as="p">
+            <button onClick="{{ p.pick }}" style="width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 14px;border:0;background:{{ p.bg }};cursor:pointer;font:inherit;text-align:left;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+              <span style="font-weight:500">{{ p.name }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ p.code }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="border-right:1px solid var(--color-divider);padding:10px 0">
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 14px 6px">Plant</div>
+          <sc-for list="{{ swPlants }}" as="p">
+            <button onClick="{{ p.pick }}" style="width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 14px;border:0;background:{{ p.bg }};cursor:pointer;font:inherit;text-align:left;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+              <span style="font-weight:500">{{ p.name }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ p.cap }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="padding:10px 0">
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 14px 6px">RO train</div>
+          <sc-for list="{{ swTrains }}" as="t">
+            <button onClick="{{ t.pick }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:40px;border:0;background:{{ t.bg }};cursor:pointer;font:inherit;text-align:left;color:{{ t.fg }};font-weight:{{ t.weight }}" style-hover="background:var(--color-accent-100)">
+              <span>{{ t.name }}</span><sc-if value="{{ t.current }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--color-divider);padding:8px 14px;font-size:12px;color:var(--color-neutral-700)">Pick a train to switch. Every page, calculation and alert follows the selected train.</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ popPalette }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-label="Command palette" style="position:absolute;z-index:51;top:12%;left:50%;transform:translateX(-50%);width:min(620px, calc(100% - 32px));background:var(--color-bg);border:1px solid var(--color-divider);box-shadow:var(--shadow-lg)">
+      <div style="display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--color-divider)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-neutral-700)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input ref="{{ qRef }}" value="{{ q }}" onChange="{{ setQ }}" onKeyDown="{{ qKey }}" placeholder="Search pages, trains and actions" aria-label="Search" style="flex:1;height:52px;border:0;background:transparent;font:inherit;font-size:16px;color:var(--color-text);outline:none">
+        <kbd style="font-family:var(--font-body);font-size:11px;border:1px solid var(--color-divider);padding:1px 6px;color:var(--color-neutral-700)">Esc</kbd>
+      </div>
+      <div style="max-height:420px;overflow-y:auto;padding:6px 0">
+        <sc-for list="{{ palGroups }}" as="pg">
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:8px 14px 4px">{{ pg.label }}</div>
+          <sc-for list="{{ pg.items }}" as="pi">
+            <button onClick="{{ pi.run }}" onMouseEnter="{{ pi.hover }}" style="width:100%;display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:0;cursor:pointer;font:inherit;text-align:left;background:{{ pi.bg }};color:{{ pi.fg }}">
+              <span style="flex:1">{{ pi.label }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700)">{{ pi.sub }}</span>
+              <sc-if value="{{ pi.soon }}"><span class="tag tag-neutral" style="font-size:10px;padding:1px 6px">Coming soon</span></sc-if>
+            </button>
+          </sc-for>
+        </sc-for>
+        <sc-if value="{{ palEmpty }}"><div style="padding:18px 14px;color:var(--color-neutral-700)">No pages or actions match “{{ q }}”.</div></sc-if>
+      </div>
+      <div style="display:flex;gap:16px;border-top:1px solid var(--color-divider);padding:8px 14px;font-size:12px;color:var(--color-neutral-700)"><span>↑ ↓ to move</span><span>Enter to open</span><span>Type “train” to switch trains</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ popAlerts }}" hint-placeholder-val="{{ false }}">
+    <aside role="dialog" aria-label="Alerts" style="position:absolute;z-index:51;top:0;right:0;bottom:0;width:min(400px, 100%);background:var(--color-bg);border-left:1px solid var(--color-divider);box-shadow:var(--shadow-lg);display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:0 10px 0 18px;height:56px;border-bottom:1px solid var(--color-divider)">
+        <h2 style="font-size:20px;margin:0;flex:1">Alerts</h2>
+        <button class="btn btn-ghost" onClick="{{ markAll }}" disabled="{{ noUnread }}">Mark all read</button>
+        <button onClick="{{ closePop }}" aria-label="Close alerts" style="width:40px;height:40px;border:0;background:transparent;cursor:pointer;font-size:20px;color:var(--color-neutral-700)" style-hover="background:var(--color-accent-100)">×</button>
+      </div>
+      <div style="padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--color-divider)">
+        <div class="seg">
+          <label class="seg-opt"><input type="radio" name="af-{{ uid }}" checked="{{ afAll }}" onChange="{{ setAfAll }}">All</label>
+          <label class="seg-opt"><input type="radio" name="af-{{ uid }}" checked="{{ afUnread }}" onChange="{{ setAfUnread }}">Unread · {{ unread }}</label>
+        </div>
+        <span style="font-size:12px;color:var(--color-neutral-700)">{{ ctxProjectShort }}</span>
+      </div>
+      <div style="flex:1;overflow-y:auto">
+        <sc-for list="{{ alertRows }}" as="al" hint-placeholder-count="4">
+          <button onClick="{{ al.open }}" style="width:100%;display:grid;grid-template-columns:10px 1fr;gap:10px;padding:14px 18px;border:0;border-bottom:1px solid var(--color-divider);background:transparent;cursor:pointer;font:inherit;text-align:left;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+            <span style="width:8px;height:8px;margin-top:7px;background:{{ al.dot }}"></span>
+            <span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+              <span style="display:flex;align-items:center;gap:8px"><span class="tag" style="font-size:10px;padding:1px 7px;letter-spacing:0.06em;background:{{ al.tbg }};color:{{ al.tfg }};border:1px solid {{ al.tbd }}">{{ al.sevLabel }}</span><span style="font-weight:{{ al.weight }};flex:1">{{ al.title }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ al.time }}</span></span>
+              <span style="font-size:13px;color:var(--color-neutral-800)">{{ al.detail }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700)">{{ al.meta }}</span>
+            </span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ alertsEmpty }}"><p style="padding:18px;color:var(--color-neutral-700)">No unread alerts.</p></sc-if>
+      </div>
+      <div style="padding:10px 18px;border-top:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">Alert rules are configured in Automation (coming soon).</div>
+    </aside>
+  </sc-if>
+
+  <sc-if value="{{ popUser }}" hint-placeholder-val="{{ false }}">
+    <div role="menu" style="position:absolute;z-index:51;top:52px;right:12px;width:300px;background:var(--color-bg);border:1px solid var(--color-divider);box-shadow:var(--shadow-lg)">
+      <div style="padding:12px 14px;border-bottom:1px solid var(--color-divider)">
+        <div style="font-weight:500">{{ user.name }}</div>
+        <div style="font-size:12px;color:var(--color-neutral-700)">{{ user.label }} · starts on {{ startLabel }}</div>
+      </div>
+      <div style="padding:8px 0;border-bottom:1px solid var(--color-divider)">
+        <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700);padding:4px 14px">Preview as role</div>
+        <sc-for list="{{ roleRows }}" as="r">
+          <button onClick="{{ r.pick }}" style="width:100%;display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:0;background:transparent;cursor:pointer;font:inherit;text-align:left;color:var(--color-text)" style-hover="background:var(--color-accent-100)">
+            <span style="width:14px;height:14px;border-radius:50%;border:1.5px solid {{ r.ring }};box-shadow:inset 0 0 0 3px var(--color-bg);background:{{ r.fill }}"></span>
+            <span style="flex:1">{{ r.label }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ r.start }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer">
+        <input type="checkbox" checked="{{ simOffline }}" onChange="{{ toggleOffline }}" style="width:16px;height:16px;accent-color:var(--color-accent);margin:0"><span>Simulate offline</span>
+      </label>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;engineer&quot;,&quot;operator&quot;,&quot;admin&quot;,&quot;guest&quot;],&quot;default&quot;:&quot;engineer&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sidebar&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;collapsed&quot;,&quot;expanded&quot;],&quot;default&quot;:&quot;collapsed&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;startPage&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;offline&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;embedded&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  static P = {
+    home: ["M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
+    design: ["M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z", "m14.5 12.5 2-2", "m11.5 9.5 2-2", "m8.5 6.5 2-2", "m17.5 15.5 2-2"],
+    inspection: ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2", "m9 14 2 2 4-4"],
+    commissioning: ["M12 2v10", "M18.4 6.6a9 9 0 1 1-12.77.04"],
+    operations: ["M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"],
+    maintenance: ["M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"],
+    automation: ["M5 3h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M7 11v4a2 2 0 0 0 2 2h4", "M15 13h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"],
+    reports: ["M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", "M14 2v4a2 2 0 0 0 2 2h4", "M16 13H8", "M16 17H8", "M10 9H8"],
+    libraries: ["m16 6 4 14", "M12 6v14", "M8 8v12", "M4 4v16"],
+    tools: ["M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z", "M8 6h8", "M16 14v4", "M16 10h.01", "M12 10h.01", "M8 10h.01", "M12 14h.01", "M8 14h.01", "M12 18h.01", "M8 18h.01"],
+    admin: ["M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"]
+  };
+  static AREAS = [
+    { id: 'home', label: 'Home', items: [['home', 'Dashboard', 'live', 'The role-based Home dashboard is designed in the next review round.']] },
+    { id: 'design', label: 'Design', items: [['intake', 'Intake', 'live'], ['pretreat', 'Pretreatment', 'soon'], ['projection', 'Membrane projection', 'soon'], ['massbal', 'Mass balance', 'soon'], ['hppump', 'HP pump & ERD', 'soon']] },
+    { id: 'inspection', label: 'Inspection', items: [['checklists', 'Checklists', 'soon'], ['punch', 'Punch list', 'soon']] },
+    { id: 'commissioning', label: 'Commissioning', items: [['precomm', 'Pre-commissioning', 'soon'], ['startup', 'Start-up log', 'soon'], ['perftest', 'Performance test', 'soon']] },
+    { id: 'operations', label: 'Operations', items: [['production', 'Production dashboard', 'soon'], ['shiftlog', 'Shift log', 'soon'], ['normalised', 'Normalised data', 'soon']] },
+    { id: 'maintenance', label: 'Maintenance', items: [['workorders', 'Work orders', 'soon'], ['cip', 'CIP schedule', 'soon'], ['elements', 'Membrane replacement', 'soon']] },
+    { id: 'automation', label: 'Automation', items: [['rules', 'Alert rules', 'soon'], ['integrations', 'Integrations', 'soon']] },
+    { id: 'reports', label: 'Reports', items: [['calcreports', 'Calculation reports', 'live', 'Existing page. The A4 calculation report layout is designed in a later round.'], ['exports', 'Export history', 'soon']] },
+    { id: 'libraries', label: 'Libraries', items: [['fittings', 'Fittings', 'live', 'Existing page. The fittings library and its import flow are redesigned in a later round.'], ['pumps', 'Pumps', 'live'], ['pipes', 'Pipe schedules', 'live'], ['membranes', 'Membranes', 'soon'], ['chemicals', 'Chemicals', 'soon']] },
+    { id: 'tools', label: 'Tools', items: [['converter', 'Unit converter', 'live'], ['velocity', 'Line velocity', 'live'], ['osmotic', 'Osmotic pressure', 'soon']] },
+    { id: 'admin', label: 'Admin', items: [['users', 'Users & roles', 'soon'], ['projects', 'Projects', 'soon'], ['settings', 'Settings', 'live']] }
+  ];
+  static ROLES = {
+    engineer: { name: 'Maya Lindqvist', initials: 'ML', label: 'Process engineer', start: 'intake' },
+    operator: { name: 'Omar Saleh', initials: 'OS', label: 'Plant operator', start: 'production' },
+    admin: { name: 'Rania Haddad', initials: 'RH', label: 'Administrator', start: 'home' },
+    guest: { name: 'Guest', initials: 'G', label: 'Not signed in', start: 'intake' }
+  };
+  static PROJECTS = [
+    { id: 'akh', name: 'Al Khaleej SWRO expansion', short: 'Al Khaleej SWRO', code: 'P-2291 · Seawater RO', plants: [{ id: 'p1', name: 'Plant 1', cap: '60,000 m³/d', trains: ['Train A', 'Train B', 'Train C', 'Train D'] }, { id: 'p2', name: 'Plant 2', cap: '40,000 m³/d', trains: ['Train A', 'Train B', 'Train C'] }] },
+    { id: 'rh', name: 'Ras Hadd BWRO', short: 'Ras Hadd BWRO', code: 'P-2310 · Brackish RO', plants: [{ id: 'p1', name: 'Plant 1', cap: '18,000 m³/d', trains: ['Train 1', 'Train 2'] }] },
+    { id: 'ng', name: 'Northgate reuse UF/RO', short: 'Northgate reuse', code: 'P-2334 · Water reuse', plants: [{ id: 'p1', name: 'Plant 1', cap: '25,000 m³/d', trains: ['Train 1', 'Train 2', 'Train 3'] }] }
+  ];
+  static ALERTS = [
+    { id: 1, sev: 'high', title: 'HP feed pressure high', detail: 'PT-2104 reads 68.9 bar against a 68.0 bar limit.', train: 'Plant 1 · Train B', src: 'Rule: HP feed pressure', time: '09:38', read: false },
+    { id: 2, sev: 'med', title: 'Normalised ΔP up 14% in 7 days', detail: 'Stage 1. A clean-in-place is recommended within 6 days.', train: 'Plant 1 · Train B', src: 'Rule: ΔP trend', time: '08:12', read: false },
+    { id: 3, sev: 'med', title: 'Filtrate SDI above 3.5', detail: 'SDI15 measured at 3.8 downstream of the cartridge filters.', train: 'Plant 1 · Train A', src: 'Lab import', time: '07:55', read: false },
+    { id: 4, sev: 'info', title: 'Calculation approved', detail: 'CALC-PT-011 Rev 2 approved by Rania Haddad.', train: 'Plant 1', src: 'Workflow', time: 'Yesterday', read: true },
+    { id: 5, sev: 'info', title: 'Fittings library updated', detail: 'Version 14 synced. Three K values changed.', train: 'All projects', src: 'Library sync', time: 'Yesterday', read: true }
+  ];
+  static U = {
+    flow: ['m³/h', 'gpm', 4.40287, 0, 0], temp: ['°C', '°F', 'T', 1, 1], tds: ['mg/L', 'mg/L', 1, 0, 0],
+    len: ['m', 'ft', 3.28084, 1, 1], dia: ['mm', 'in', 1 / 25.4, 0, 2], rough: ['mm', 'in', 1 / 25.4, 3, 5],
+    press: ['bar', 'psi', 14.5038, 2, 1], pct: ['%', '%', 1, 0, 0], vel: ['m/s', 'ft/s', 3.28084, 2, 2], power: ['kW', 'hp', 1.34102, 1, 1]
+  };
+  static SECTIONS = [
+    { num: '01', title: 'Feed water', fields: [
+      { k: 'flow', label: 'Design flow', u: 'flow', req: true, hint: 'Intake flow to pretreatment' },
+      { k: 'temp', label: 'Feed temperature', u: 'temp', rec: 25, why: 'design seawater temperature' },
+      { k: 'tds', label: 'Feed TDS', u: 'tds', rec: 35000, why: 'typical open seawater' }] },
+    { num: '02', title: 'Intake line', material: true, fields: [
+      { k: 'length', label: 'Line length', u: 'len', req: true, hint: 'Intake head to wet well' },
+      { k: 'dia', label: 'Internal diameter', u: 'dia', rec: 'dia', why: 'sized for 1.5 m/s at design flow' },
+      { k: 'rough', label: 'Absolute roughness', u: 'rough', rec: 'rough', why: 'typical for the pipe material' },
+      { k: 'static', label: 'Static head', u: 'len', req: true, hint: 'Wet-well low level to filter inlet' }] },
+    { num: '03', title: 'Pump and delivery', fields: [
+      { k: 'resid', label: 'Residual pressure', u: 'press', rec: 2.0, why: 'pressure at the filter inlet' },
+      { k: 'margin', label: 'Head margin', u: 'pct', rec: 10, why: 'design allowance' },
+      { k: 'peff', label: 'Pump efficiency', u: 'pct', rec: 78, why: 'split-case pump at BEP' },
+      { k: 'meff', label: 'Motor efficiency', u: 'pct', rec: 95, why: 'IE3 motor' }] }
+  ];
+  static MATERIALS = { 'HDPE PE100': 0.007, 'GRP': 0.01, 'Super duplex': 0.015, 'Cement-lined carbon steel': 0.3 };
+  static FLIB = [['Pipe entrance, bellmouth', 0.05], ['Pipe entrance, projecting', 0.8], ['90° elbow, long radius', 0.3], ['45° elbow', 0.2], ['Tee, run through', 0.4], ['Butterfly valve, open', 0.35], ['Gate valve, open', 0.15], ['Swing check valve', 2.0], ['Basket strainer', 1.5], ['Reducer, concentric', 0.1], ['Pipe exit', 1.0]];
+  static MOTORS = [7.5, 11, 15, 18.5, 22, 30, 37, 45, 55, 75, 90, 110, 132, 160, 200, 250, 315, 355, 400, 450, 500, 560, 630];
+
+  rootRef = React.createRef();
+  mainRef = React.createRef();
+  qRef = React.createRef();
+  uid = Math.random().toString(36).slice(2, 7);
+
+  state = (() => {
+    const role = this.props.role ?? 'engineer';
+    let expanded = this.props.sidebar ? this.props.sidebar === 'expanded' : false;
+    let units = 'si';
+    if (!this.props.embedded) {
+      try { const s = JSON.parse(localStorage.getItem('roshell.prefs') || '{}'); if (s.expanded != null) expanded = s.expanded; if (s.units) units = s.units; } catch (e) {}
+    }
+    const page = this.props.startPage || Component.ROLES[role].start;
+    return {
+      role, page, expanded, units, roadmap: false, openGroups: { home: true, design: true, libraries: true, tools: true, reports: true, admin: true, operations: true },
+      online: typeof navigator === 'undefined' ? true : navigator.onLine, simOffline: !!this.props.offline,
+      pop: null, q: '', qi: 0, ctx: { proj: 'akh', plant: 'p1', train: 'Train B' }, browse: { proj: 'akh', plant: 'p1' },
+      alerts: Component.ALERTS.map(a => ({ ...a })), af: 'all', w: 1400,
+      f: { flow: { raw: '450', sys: 'si' }, tds: { raw: '42000', sys: 'si' }, length: { raw: '320', sys: 'si' }, static: { raw: '6.5', sys: 'si' }, peff: { raw: '80', sys: 'si' } },
+      material: 'HDPE PE100',
+      fittings: [['Pipe entrance, bellmouth', 1], ['90° elbow, long radius', 6], ['45° elbow', 2], ['Butterfly valve, open', 2], ['Swing check valve', 1], ['Basket strainer', 1], ['Pipe exit', 1]].map(([n, q]) => ({ name: n, k: Component.FLIB.find(x => x[0] === n)[1], qty: q })),
+      status: 'draft', rev: 3, savedAt: ''
+    };
+  })();
+
+  componentDidMount() {
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) { this.ro = new ResizeObserver(e => this.setState({ w: e[0].contentRect.width })); this.ro.observe(el); }
+    this.onNet = () => this.setState({ online: navigator.onLine });
+    window.addEventListener('online', this.onNet); window.addEventListener('offline', this.onNet);
+    this.onKey = e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.openPop('palette'); }
+      else if (e.key === 'Escape' && this.state.pop) this.setState({ pop: null });
+    };
+    if (!this.props.embedded) document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); window.removeEventListener('online', this.onNet); window.removeEventListener('offline', this.onNet); document.removeEventListener('keydown', this.onKey); }
+  componentDidUpdate(pp, ps) {
+    if (!this.props.embedded && (ps.expanded !== this.state.expanded || ps.units !== this.state.units)) {
+      try { localStorage.setItem('roshell.prefs', JSON.stringify({ expanded: this.state.expanded, units: this.state.units })); } catch (e) {}
+    }
+    if (this.state.pop === 'palette' && ps.pop !== 'palette') setTimeout(() => this.qRef.current && this.qRef.current.focus(), 0);
+  }
+
+  openPop(p) { this.setState(s => ({ pop: s.pop === p ? null : p, q: p === 'palette' ? '' : s.q, qi: 0, browse: p === 'switcher' ? { proj: s.ctx.proj, plant: s.ctx.plant } : s.browse })); }
+  find(id) { for (const a of Component.AREAS) for (const it of a.items) if (it[0] === id) return { id, label: it[1], status: it[2], note: it[3], area: a.label, areaId: a.id }; return null; }
+  go(id) { const f = this.find(id); this.setState(s => ({ page: id, pop: null, openGroups: { ...s.openGroups, [f.areaId]: true } })); if (this.mainRef.current) this.mainRef.current.scrollTop = 0; }
+  conv(u, v, sys) { const d = Component.U[u]; if (sys === 'si') return v; return d[2] === 'T' ? v * 9 / 5 + 32 : v * d[2]; }
+  toSI(u, v, sys) { const d = Component.U[u]; if (sys === 'si') return v; return d[2] === 'T' ? (v - 32) * 5 / 9 : v / d[2]; }
+  fmt(v, dp) { if (v == null || !isFinite(v)) return '—'; return v.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp }); }
+  show(u, v) { const d = Component.U[u]; const sys = this.state.units; return this.fmt(this.conv(u, v, sys), sys === 'si' ? d[3] : d[4]); }
+  unit(u) { return Component.U[u][this.state.units === 'si' ? 0 : 1]; }
+  fieldDef(k) { for (const s of Component.SECTIONS) for (const f of s.fields) if (f.k === k) return f; }
+  raw(k) { const f = this.state.f[k]; return f && String(f.raw).trim() !== '' ? f : null; }
+  si(k) { const f = this.raw(k); if (!f) return null; const n = parseFloat(String(f.raw).replace(/,/g, '')); if (isNaN(n)) return NaN; return this.toSI(this.fieldDef(k).u, n, f.sys); }
+  rec(k) {
+    const d = this.fieldDef(k);
+    if (d.rec === 'dia') { const Q = this.si('flow'); return Q > 0 ? Math.round(Math.sqrt(4 * (Q / 3600) / (Math.PI * 1.5)) * 1000 / 5) * 5 : null; }
+    if (d.rec === 'rough') return Component.MATERIALS[this.state.material];
+    return d.rec ?? null;
+  }
+  val(k) { const v = this.si(k); return v == null ? this.rec(k) : v; }
+  touch(extra) {
+    this.setState(s => {
+      const n = { ...extra(s), savedAt: '' };
+      if (s.status !== 'draft') { n.status = 'draft'; n.rev = s.rev + 1; }
+      return n;
+    });
+  }
+
+  calc() {
+    const need = [['flow', 'design flow'], ['length', 'line length'], ['static', 'static head']];
+    const missing = need.filter(([k]) => !(this.si(k) >= 0) || this.si(k) == null).map(x => x[1]);
+    const Q = this.val('flow') / 3600, L = this.val('length'), Hs = this.val('static');
+    const T = this.val('temp'), S = this.val('tds'), D = this.val('dia') / 1000, eps = this.val('rough') / 1000;
+    const P = this.val('resid') * 1e5, M = this.val('margin') / 100, ep = this.val('peff') / 100, em = this.val('meff') / 100;
+    if (missing.length || !(Q > 0 && D > 0 && ep > 0 && em > 0)) return { missing: missing.length ? missing : ['valid values'] };
+    const g = 9.81, rho = 997.05 * (1 - 0.00021 * (T - 25)) + 0.00075 * S;
+    const mu = 2.414e-5 * Math.pow(10, 247.8 / (T + 133.15)) * (1 + 0.0000023 * S);
+    const A = Math.PI * D * D / 4, v = Q / A, Re = rho * v * D / mu;
+    const f = 0.25 / Math.pow(Math.log10(eps / (3.7 * D) + 5.74 / Math.pow(Re, 0.9)), 2);
+    const vh = v * v / (2 * g), hf = f * L / D * vh, sumK = this.state.fittings.reduce((a, x) => a + x.k * x.qty, 0), hm = sumK * vh;
+    const hp = P / (rho * g), base = Hs + hf + hm + hp, hmar = base * M, H = base + hmar;
+    const Ph = rho * g * Q * H / 1000, Ps = Ph / ep, Pin = Ps / em;
+    const motor = Component.MOTORS.find(m => m >= Ps * 1.1) || null;
+    return { Q, v, Re, f, hf, hm, sumK, Hs, hp, hmar, H, Ph, Ps, Pin, motor, load: motor ? Ps / motor : null, rho };
+  }
+
+  chart(r) {
+    const X0 = 44, X1 = 508, Y0 = 200, Y1 = 14, Qd = r.Q * 3600, qmax = Qd * 1.5;
+    const stat = (r.Hs + r.hp) * (1 + (r.hmar / (r.H - r.hmar))), dyn = r.H - stat;
+    const sys = q => stat + dyn * Math.pow(q / Qd, 2), H0 = r.H * 1.32, kp = (H0 - r.H) / (Qd * Qd), pump = q => H0 - kp * q * q;
+    const hmax = Math.max(H0, sys(qmax)) * 1.08;
+    const x = q => X0 + (q / qmax) * (X1 - X0), y = h => Y0 - (h / hmax) * (Y0 - Y1);
+    const path = fn => { let d = ''; for (let i = 0; i <= 40; i++) { const q = qmax * i / 40, h = fn(q); if (h < 0) break; d += (i ? 'L' : 'M') + x(q).toFixed(1) + ' ' + y(h).toFixed(1); } return d; };
+    const hu = this.state.units === 'si' ? 1 : 3.28084;
+    const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({ y: y(hmax * t).toFixed(1), ty: (y(hmax * t) + 4).toFixed(1), label: this.fmt(hmax * t * hu, 0) }));
+    const xTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({ x: x(qmax * t).toFixed(1), label: this.fmt(this.conv('flow', qmax * t, this.state.units), 0) }));
+    const ox = x(Qd), oy = y(r.H);
+    return { sys: path(sys), pump: path(pump), yTicks, xTicks, ox: ox.toFixed(1), oy: oy.toFixed(1), lx: (ox + 10).toFixed(1), ly: (oy - 10).toFixed(1), duty: this.show('flow', Qd) + ' ' + this.unit('flow') + ' · ' + this.show('len', r.H) + ' ' + this.unit('len') };
+  }
+
+  renderVals() {
+    const s = this.state, C = Component;
+    const narrow = s.w < 1100, wide = s.w >= 1280;
+    const user = C.ROLES[s.role], page = this.find(s.page);
+    const offline = !s.online || s.simOffline;
+    const guest = s.role === 'guest';
+    const locked = offline || s.role === 'operator';
+    const cur = page.areaId;
+    const visItems = a => a.items.filter(it => s.roadmap || it[2] === 'live' || it[0] === s.page);
+    const visAreas = C.AREAS.filter(a => visItems(a).length);
+    const soonCount = C.AREAS.reduce((n, a) => n + a.items.filter(i => i[2] === 'soon').length, 0);
+
+    const railAreas = visAreas.map(a => ({ label: a.label, paths: C.P[a.id], bg: a.id === cur ? 'var(--color-accent-100)' : 'transparent', fg: a.id === cur ? 'var(--color-accent-800)' : 'var(--color-neutral-800)', open: () => this.setState(st => ({ expanded: true, openGroups: { ...st.openGroups, [a.id]: true } })) }));
+    const groups = visAreas.map(a => {
+      const open = !!s.openGroups[a.id];
+      return {
+        label: a.label, paths: C.P[a.id], open, rot: open ? '90deg' : '0deg', fg: a.id === cur ? 'var(--color-accent-800)' : 'var(--color-text)',
+        toggle: () => this.setState(st => ({ openGroups: { ...st.openGroups, [a.id]: !st.openGroups[a.id] } })),
+        items: visItems(a).map(it => {
+          const active = it[0] === s.page;
+          return { label: it[1], soon: it[2] === 'soon', current: active ? 'page' : undefined, go: () => this.go(it[0]), bg: active ? 'var(--color-accent-100)' : 'transparent', fg: active ? 'var(--color-accent-800)' : (it[2] === 'soon' ? 'var(--color-neutral-700)' : 'var(--color-text)'), weight: active ? 600 : 400 };
+        })
+      };
+    });
+
+    const proj = C.PROJECTS.find(p => p.id === s.ctx.proj), plant = proj.plants.find(p => p.id === s.ctx.plant);
+    const bProj = C.PROJECTS.find(p => p.id === s.browse.proj), bPlant = bProj.plants.find(p => p.id === s.browse.plant) || bProj.plants[0];
+
+    const crumbs = [{ label: page.area, go: () => { const a = C.AREAS.find(x => x.id === page.areaId); const first = a.items.find(i => i[2] === 'live') || a.items[0]; this.go(first[0]); } }, { label: page.label, go: () => this.go(page.id) }];
+    if (s.page === 'intake') crumbs.push({ label: 'Pump sizing' });
+    crumbs.forEach((c, i) => { const last = i === crumbs.length - 1; c.link = !last; c.plain = last; c.sep = !last; });
+
+    const out = {
+      rootH: this.props.embedded ? '100%' : '100vh',
+      rootRef: this.rootRef, mainRef: this.mainRef, qRef: this.qRef, uid: this.uid,
+      narrow, wide, showRail: !narrow && !s.expanded, showSide: (!narrow && s.expanded) || (narrow && s.pop === 'drawer'),
+      drawerOpen: narrow && s.pop === 'drawer', sidePos: narrow ? 'absolute' : 'relative', sideShadow: narrow ? 'var(--shadow-lg)' : 'none',
+      rowH: narrow ? '44px' : '36px', itemH: narrow ? '44px' : '34px',
+      expand: () => this.setState({ expanded: true }), collapse: () => this.setState({ expanded: false, pop: null }), openDrawer: () => this.setState({ pop: 'drawer' }),
+      railAreas, groups, roadmap: s.roadmap, soonCount, toggleRoadmap: () => this.setState(st => ({ roadmap: !st.roadmap })),
+      ctxProject: proj.name, ctxProjectShort: proj.short + ' · ' + plant.name, ctxPlantTrain: plant.name + ' / ' + s.ctx.train, ctxShort: proj.short + ' · ' + plant.name + ' · ' + s.ctx.train,
+      openSwitcher: () => this.openPop('switcher'), openPalette: () => this.openPop('palette'), openAlerts: () => this.openPop('alerts'), openUser: () => this.openPop('user'),
+      closePop: () => this.setState({ pop: null }),
+      isSI: s.units === 'si', isImp: s.units === 'imp', setSI: () => this.setState({ units: 'si' }), setImp: () => this.setState({ units: 'imp' }),
+      isOffline: offline, isOnline: !offline, syncedAt: '09:42', isGuest: guest,
+      signInEngineer: () => this.setState({ role: 'engineer' }),
+      user, crumbs, page,
+      anyPop: ['switcher', 'palette', 'alerts', 'user'].includes(s.pop), scrim: s.pop === 'palette' || s.pop === 'alerts' ? 'color-mix(in srgb, var(--color-neutral-900) 35%, transparent)' : 'transparent',
+      popSwitcher: s.pop === 'switcher', popPalette: s.pop === 'palette', popAlerts: s.pop === 'alerts', popUser: s.pop === 'user',
+      popLeft: narrow ? '12px' : (s.expanded ? '276px' : '68px'),
+      swProjects: C.PROJECTS.map(p => ({ name: p.name, code: p.code, bg: p.id === bProj.id ? 'var(--color-accent-100)' : 'transparent', pick: () => this.setState({ browse: { proj: p.id, plant: p.plants[0].id } }) })),
+      swPlants: bProj.plants.map(p => ({ name: p.name, cap: p.cap, bg: p.id === bPlant.id ? 'var(--color-accent-100)' : 'transparent', pick: () => this.setState(st => ({ browse: { ...st.browse, plant: p.id } })) })),
+      swTrains: bPlant.trains.map(t => { const c = bProj.id === s.ctx.proj && bPlant.id === s.ctx.plant && t === s.ctx.train; return { name: t, current: c, bg: c ? 'var(--color-accent-100)' : 'transparent', fg: c ? 'var(--color-accent-800)' : 'var(--color-text)', weight: c ? 600 : 400, pick: () => this.setState({ ctx: { proj: bProj.id, plant: bPlant.id, train: t }, pop: null }) }; }),
+      startLabel: this.find(user.start).area + ' › ' + this.find(user.start).label,
+      goStart: () => this.go(user.start),
+      roleRows: Object.entries(C.ROLES).map(([k, r]) => ({ label: r.label === 'Not signed in' ? 'Guest' : r.label, start: this.find(r.start).label, ring: k === s.role ? 'var(--color-accent)' : 'var(--color-neutral-500)', fill: k === s.role ? 'var(--color-accent)' : 'transparent', pick: () => { this.setState({ role: k, pop: null }); this.go(r.start); } })),
+      simOffline: s.simOffline, toggleOffline: () => this.setState(st => ({ simOffline: !st.simOffline })),
+      isIntake: s.page === 'intake', isPlaceholder: s.page !== 'intake', isExisting: page.status === 'live', isSoon: page.status === 'soon',
+      phTag: page.status === 'live' ? 'Existing page' : 'Coming soon', phTagClass: page.status === 'live' ? 'tag-accent' : 'tag-neutral',
+      phText: page.status === 'live' ? (page.note || "This page exists in today's app and moves into the new shell unchanged.") : 'Planned for ' + page.area + '. It appears in the sidebar once released. Turn on “Show roadmap” to see every planned page.',
+      areaItems: C.AREAS.find(a => a.id === page.areaId).items.map(it => ({ label: it[1], state: it[2] === 'live' ? 'Available' : 'Coming soon', cls: it[2] === 'live' ? 'tag-accent' : 'tag-neutral' })),
+      q: s.q, setQ: e => this.setState({ q: e.target.value, qi: 0 })
+    };
+
+    // alerts
+    const unread = s.alerts.filter(a => !a.read).length;
+    const sev = { high: ['High', '', 'var(--color-accent-900)'], med: ['Medium', 'tag-outline', 'var(--color-accent)'], info: ['Info', 'tag-neutral', 'var(--color-neutral-500)'] };
+    const al = s.alerts.filter(a => s.af === 'all' || !a.read);
+    Object.assign(out, {
+      unread, hasUnread: unread > 0, noUnread: unread === 0, afAll: s.af === 'all', afUnread: s.af === 'unread',
+      setAfAll: () => this.setState({ af: 'all' }), setAfUnread: () => this.setState({ af: 'unread' }),
+      markAll: () => this.setState(st => ({ alerts: st.alerts.map(a => ({ ...a, read: true })) })), alertsEmpty: al.length === 0,
+      alertRows: al.map(a => ({ ...a, sevLabel: sev[a.sev][0], cls: a.sev === 'high' ? 'tag-high' : sev[a.sev][1], dot: a.read ? 'transparent' : sev[a.sev][2], weight: a.read ? 400 : 600, meta: a.train + ' · ' + a.src, open: () => this.setState(st => ({ alerts: st.alerts.map(x => x.id === a.id ? { ...x, read: true } : x) })) }))
+    });
+    const tagC = c => c === 'tag-solid' ? ['var(--color-accent-900)', 'var(--color-bg)', 'transparent'] : c === 'tag-outline' ? ['transparent', 'var(--color-accent-800)', 'var(--color-accent)'] : c === 'tag-neutral' ? ['var(--color-neutral-100)', 'var(--color-neutral-800)', 'transparent'] : ['var(--color-accent-100)', 'var(--color-accent-800)', 'transparent'];
+    this.tagC = tagC;
+    out.alertRows.forEach(r => { const t = tagC(r.sev === 'high' ? 'tag-solid' : r.cls); r.tbg = t[0]; r.tfg = t[1]; r.tbd = t[2]; });
+
+    // palette
+    const words = s.q.toLowerCase().split(/\s+/).filter(Boolean);
+    const match = t => words.every(w => t.toLowerCase().includes(w));
+    const pages = [], soon = [], acts = [];
+    C.AREAS.forEach(a => a.items.forEach(it => { const e = { label: it[1], sub: a.label, soon: it[2] === 'soon', run: () => this.go(it[0]), key: it[1] + ' ' + a.label }; (e.soon ? soon : pages).push(e); }));
+    acts.push({ label: s.units === 'si' ? 'Switch to Imperial units' : 'Switch to SI units', sub: 'Units', run: () => this.setState(st => ({ units: st.units === 'si' ? 'imp' : 'si', pop: null })) });
+    acts.push({ label: s.expanded ? 'Collapse sidebar' : 'Expand sidebar', sub: 'View', run: () => this.setState(st => ({ expanded: !st.expanded, pop: null })) });
+    acts.push({ label: 'Open alerts', sub: unread + ' unread', run: () => this.setState({ pop: 'alerts' }) });
+    acts.push({ label: s.roadmap ? 'Hide roadmap pages' : 'Show roadmap pages', sub: 'Navigation', run: () => this.setState(st => ({ roadmap: !st.roadmap, pop: null })) });
+    const trains = [];
+    C.PROJECTS.forEach(p => p.plants.forEach(pl => pl.trains.forEach(t => trains.push({ label: 'Switch to ' + t, sub: p.short + ' · ' + pl.name, run: () => this.setState({ ctx: { proj: p.id, plant: pl.id, train: t }, pop: null }), key: 'train ' + t + ' ' + p.name + ' ' + pl.name }))));
+    let groupsP = [['Pages', pages], ['Actions', acts], ['Trains', words.length ? trains : []], ['Coming soon', soon]].map(([l, arr]) => [l, arr.filter(e => match(e.key || (e.label + ' ' + e.sub)))]).filter(g => g[1].length);
+    if (!words.length) groupsP = groupsP.map(([l, a]) => [l, l === 'Pages' ? a : a.slice(0, l === 'Coming soon' ? 4 : 4)]);
+    const flat = []; groupsP.forEach(g => g[1].forEach(e => flat.push(e)));
+    const qi = Math.min(s.qi, Math.max(0, flat.length - 1));
+    let idx = 0;
+    out.palGroups = groupsP.map(([l, arr]) => ({ label: l, items: arr.map(e => { const i = idx++; const on = i === qi; return { label: e.label, sub: e.sub, soon: !!e.soon, bg: on ? 'var(--color-accent-100)' : 'transparent', fg: on ? 'var(--color-accent-800)' : (e.soon ? 'var(--color-neutral-700)' : 'var(--color-text)'), run: e.run, hover: () => this.setState({ qi: i }) }; }) }));
+    out.palEmpty = flat.length === 0;
+    out.qKey = e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); this.setState({ qi: Math.min(qi + 1, flat.length - 1) }); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState({ qi: Math.max(qi - 1, 0) }); }
+      else if (e.key === 'Enter' && flat[qi]) flat[qi].run();
+      else if (e.key === 'Escape') this.setState({ pop: null });
+    };
+
+    // intake
+    const canSubmit = !offline && (s.role === 'engineer' || s.role === 'admin') && s.status === 'draft';
+    const stat = { draft: ['Draft · Rev ' + s.rev, 'tag-neutral'], review: ['In review · Rev ' + s.rev, 'tag-outline'], approved: ['Approved · Rev ' + s.rev, 'tag-accent'] }[s.status];
+    Object.assign(out, {
+      locked, material: s.material, materials: Object.keys(C.MATERIALS),
+      setMaterial: e => { const v = e.target.value; this.touch(() => ({ material: v })); },
+      statusLabel: guest ? 'Local draft' : stat[0], statusTagClass: guest ? 'tag-outline' : stat[1], savedAt: s.savedAt,
+      saveLabel: guest ? 'Save on this device' : 'Save draft', cantSave: locked || s.status !== 'draft',
+      saveDraft: () => this.setState({ savedAt: 'Saved ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + (guest ? ' on this device' : '') }),
+      showSubmit: s.status !== 'review' || s.role !== 'admin', cantSubmit: !canSubmit,
+      submitTitle: guest ? 'Sign in to submit for approval' : offline ? 'Unavailable offline' : s.status !== 'draft' ? 'Already submitted' : '',
+      submit: () => this.setState({ status: 'review', savedAt: '' }),
+      showApprove: s.status === 'review' && s.role === 'admin' && !offline,
+      approve: () => this.setState({ status: 'approved' }), returnDraft: () => this.setState({ status: 'draft' }),
+      readOnlyNote: offline ? 'Read-only while offline.' : s.role === 'operator' ? 'Operators view design calculations read-only.' : s.status === 'review' ? 'Submitted for approval. Editing any value starts Rev ' + (s.rev + 1) + '.' : s.status === 'approved' ? 'Approved. Editing any value starts a new draft, Rev ' + (s.rev + 1) + '.' : ''
+    });
+
+    let recUsed = 0;
+    out.sections = C.SECTIONS.map(sec => ({
+      num: sec.num, title: sec.title, hasMaterial: !!sec.material,
+      fields: sec.fields.map(fd => {
+        const f = s.f[fd.k], blank = !this.raw(fd.k), rec = this.rec(fd.k), hasRec = fd.rec != null;
+        const recTxt = rec == null ? '—' : this.show(fd.u, rec);
+        const value = blank ? '' : (f.sys === s.units ? f.raw : String(+this.conv(fd.u, this.si(fd.k), s.units).toFixed(s.units === 'si' ? C.U[fd.u][3] : C.U[fd.u][4])));
+        const bad = !blank && !(this.si(fd.k) >= 0);
+        const err = bad ? 'Enter a positive number' : (fd.req && blank ? 'Required' : '');
+        if (blank && hasRec) recUsed++;
+        const unit = this.unit(fd.u);
+        const helper = err || (blank && hasRec ? 'Blank uses ' + recTxt + ' ' + unit + ', ' + fd.why + '.' : hasRec ? 'Recommended ' + recTxt + ' ' + unit + '. Clear to use it.' : fd.hint || '');
+        return {
+          label: fd.label, unit, value, placeholder: blank && hasRec ? recTxt : '', showRec: blank && hasRec, helper,
+          helpColor: err ? 'var(--color-text)' : blank && hasRec ? 'var(--color-accent-700)' : 'var(--color-neutral-700)',
+          border: err ? 'var(--color-text)' : blank && hasRec ? 'color-mix(in srgb, var(--color-accent) 55%, transparent)' : 'var(--color-divider)',
+          onChange: e => { const raw = e.target.value; this.touch(st => ({ f: { ...st.f, [fd.k]: { raw, sys: st.units } } })); }
+        };
+      })
+    }));
+    out.recCountText = recUsed ? recUsed + ' recommended value' + (recUsed > 1 ? 's' : '') + ' in use' : 'All values entered';
+
+    out.fittingRows = s.fittings.map((x, i) => ({
+      name: x.name, k: this.fmt(x.k, 2), qty: x.qty, kq: this.fmt(x.k * x.qty, 2),
+      inc: () => this.touch(st => ({ fittings: st.fittings.map((y, j) => j === i ? { ...y, qty: y.qty + 1 } : y) })),
+      dec: () => this.touch(st => ({ fittings: st.fittings.map((y, j) => j === i ? { ...y, qty: Math.max(0, y.qty - 1) } : y) })),
+      remove: () => this.touch(st => ({ fittings: st.fittings.filter((y, j) => j !== i) }))
+    }));
+    out.sumK = this.fmt(s.fittings.reduce((a, x) => a + x.k * x.qty, 0), 2);
+    out.fittingLib = C.FLIB.filter(x => !s.fittings.some(y => y.name === x[0])).map(x => ({ name: x[0], k: this.fmt(x[1], 2) }));
+    out.addFitting = e => { const n = e.target.value; if (!n) return; const k = C.FLIB.find(x => x[0] === n)[1]; this.touch(st => ({ fittings: [...st.fittings, { name: n, k, qty: 1 }] })); };
+
+    const r = this.calc();
+    out.headUnit = this.unit('len'); out.flowUnit = this.unit('flow');
+    if (r.missing) {
+      Object.assign(out, { hasResult: false, noResult: true, missingText: r.missing.join(', '), kpis: [], resultRows: [], checks: [], chart: { yTicks: [], xTicks: [] } });
+    } else {
+      const imp = s.units === 'imp';
+      const motorTxt = r.motor ? (imp ? this.fmt(r.motor * 1.34102, 0) : this.fmt(r.motor, r.motor % 1 ? 1 : 0)) : '—';
+      out.hasResult = true; out.noResult = false;
+      out.kpis = [
+        { label: 'Total head', value: this.show('len', r.H), unit: this.unit('len') + ' TDH', border: '0' },
+        { label: 'Motor input', value: this.show('power', r.Pin), unit: this.unit('power') + ' electrical', border: '1px solid var(--color-divider)' },
+        { label: 'Motor size', value: motorTxt, unit: (imp ? 'hp' : 'kW') + ' standard frame', border: '1px solid var(--color-divider)' }
+      ];
+      const row = (label, value, unit, strong) => ({ label, value, unit, weight: strong ? 600 : 400, color: strong ? 'var(--color-text)' : 'var(--color-neutral-800)' });
+      out.resultRows = [
+        row('Line velocity', this.show('vel', r.v), this.unit('vel')),
+        row('Reynolds number', this.fmt(r.Re, 0), ''),
+        row('Friction factor (Swamee–Jain)', this.fmt(r.f, 4), ''),
+        row('Friction loss', this.show('len', r.hf), this.unit('len')),
+        row('Fittings loss, ΣK ' + this.fmt(r.sumK, 2), this.show('len', r.hm), this.unit('len')),
+        row('Static head', this.show('len', r.Hs), this.unit('len')),
+        row('Residual pressure as head', this.show('len', r.hp), this.unit('len')),
+        row('Head margin', this.show('len', r.hmar), this.unit('len')),
+        row('Total dynamic head', this.show('len', r.H), this.unit('len'), true),
+        row('Hydraulic power', this.show('power', r.Ph), this.unit('power')),
+        row('Shaft power', this.show('power', r.Ps), this.unit('power')),
+        row('Motor input power', this.show('power', r.Pin), this.unit('power'), true)
+      ];
+      const vOk = r.v >= 1.0 && r.v <= 2.0;
+      out.checks = [
+        { tag: vOk ? 'OK' : 'CHECK', cls: vOk ? 'tag-accent' : 'tag-solid', text: 'Line velocity ' + this.show('vel', r.v) + ' ' + this.unit('vel') + (vOk ? ' is within ' : ' is outside ') + (imp ? '3.3–6.6 ft/s' : '1.0–2.0 m/s') + ' for intake lines.' },
+        { tag: r.load && r.load <= 0.91 ? 'OK' : 'CHECK', cls: r.load && r.load <= 0.91 ? 'tag-accent' : 'tag-solid', text: 'Motor loaded to ' + this.fmt((r.load || 0) * 100, 0) + '% of nameplate at duty.' },
+        { tag: 'NOTE', cls: 'tag-neutral', text: 'Fluid density ' + this.fmt(r.rho, 1) + ' kg/m³ from temperature and TDS.' }
+      ];
+      out.checks.forEach(c => { const t = this.tagC(c.cls); c.tbg = t[0]; c.tfg = t[1]; });
+      out.chart = this.chart(r);
+    }
+    return out;
+  }
+}
+</script>
+</body>
+</html>

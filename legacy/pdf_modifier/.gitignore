@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+workspace/
+server.log
+.secret_key
+.env

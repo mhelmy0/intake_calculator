@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Toolkit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2218%22 font-size=%2218%22>📄</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">📄</span>
+      <span class="brand-name">PDF Toolkit</span>
+    </div>
+    <button id="resetBtn" class="btn btn-ghost" hidden>Clear all</button>
+  </header>
+
+  <main>
+    <section id="dropzone" class="dropzone">
+      <div class="dropzone-inner">
+        <div class="dropzone-icon">📄</div>
+        <h1>Merge, organize &amp; edit PDFs</h1>
+        <p>Drop PDF files here, or choose files to get started. Everything runs locally &mdash; nothing leaves your machine.</p>
+        <label class="btn btn-primary" for="fileInput">Choose PDF files</label>
+        <input id="fileInput" type="file" accept="application/pdf" multiple hidden />
+      </div>
+    </section>
+
+    <section id="workspace" class="workspace" hidden>
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <label class="btn btn-secondary" for="addFileInput">+ Add files</label>
+          <input id="addFileInput" type="file" accept="application/pdf" multiple hidden />
+          <button id="selectAllBtn" class="btn btn-ghost">Select all</button>
+          <button id="selectNoneBtn" class="btn btn-ghost">Deselect</button>
+        </div>
+        <div class="toolbar-group">
+          <button id="rotateLeftBtn" class="btn btn-ghost" title="Rotate selected left">⟲ Rotate</button>
+          <button id="rotateRightBtn" class="btn btn-ghost" title="Rotate selected right">⟳ Rotate</button>
+          <button id="deleteSelectedBtn" class="btn btn-danger-ghost" title="Delete selected pages">🗑 Delete</button>
+        </div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <div class="output-bar">
+        <div class="output-bar-inner">
+          <input id="outputFilename" type="text" value="merged.pdf" spellcheck="false" />
+          <button id="extractBtn" class="btn btn-secondary">Extract selected</button>
+          <button id="splitZipBtn" class="btn btn-secondary">Split to pages (.zip)</button>
+          <button id="downloadBtn" class="btn btn-primary">⬇ Download PDF</button>
+        </div>
+        <p id="statusMsg" class="status-msg" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

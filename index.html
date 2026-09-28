@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RO Workbench</title>
+<link rel="stylesheet" href="assets/css/industry.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<!-- Module styles -->
+<link rel="stylesheet" href="modules/home/home.css">
+<link rel="stylesheet" href="modules/intake/intake.css">
+<link rel="stylesheet" href="modules/libraries/libraries.css">
+<link rel="stylesheet" href="modules/tools/tools.css">
+<link rel="stylesheet" href="modules/pipeline/pipeline.css">
+<link rel="stylesheet" href="modules/bom/bom.css">
+<link rel="stylesheet" href="modules/pretreat/pretreat.css">
+<link rel="stylesheet" href="modules/pdftools/pdftools.css">
+</head>
+<body class="app">
+<div id="shell" class="shell">
+
+  <nav id="rail" class="rail" aria-label="Main" hidden></nav>
+  <div id="drawer-scrim" class="drawer-scrim" hidden></div>
+  <nav id="side" class="side" aria-label="Main" hidden></nav>
+
+  <div class="shell-main">
+    <header class="topbar">
+      <button id="btn-drawer" class="icon-btn-lg" aria-label="Open navigation" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+      </button>
+      <button id="ctx-btn" class="ctx-btn" aria-haspopup="dialog">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ctx-ico"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m2 12 8.58 3.91a2 2 0 0 0 1.66 0L21 12"></path><path d="m2 17 8.58 3.91a2 2 0 0 0 1.66 0L21 17"></path></svg>
+        <span class="ctx-lines"><span class="ctx-l1">No project selected</span><span class="ctx-l2">Standalone</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ctx-chev"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+      <button id="search-btn" class="search-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="search-txt">Search pages and actions</span><kbd>Ctrl K</kbd>
+      </button>
+      <div class="grow"></div>
+      <div class="seg" role="radiogroup" aria-label="Units">
+        <label class="seg-opt"><input type="radio" name="units" value="si" id="u-si">SI</label>
+        <label class="seg-opt"><input type="radio" name="units" value="imp" id="u-imp">Imperial</label>
+      </div>
+      <span id="net-status"></span>
+      <span id="guest-tag" class="tag tag-outline top-tag" hidden>Guest</span>
+      <button id="alerts-btn" class="icon-btn-lg bell" aria-label="Alerts"></button>
+      <div id="account"></div>
+    </header>
+
+    <div id="banner-offline" class="banner banner-dark" role="status" hidden>
+      <strong>You're offline.</strong><span>Calculators keep working with the bundled recommended values and fittings list. Saving and shared libraries resume when the server is reachable.</span>
+    </div>
+    <div id="banner-guest" class="banner banner-light" role="status" hidden>
+      <span class="grow"><strong>Guest session.</strong> Drafts are saved on this device only. Sign in to share them and use the shared libraries for saving.</span>
+      <button class="btn btn-secondary" id="guest-signin">Sign in</button>
+    </div>
+
+    <main class="page">
+      <div class="page-head">
+        <nav id="crumbs" class="crumbs" aria-label="Breadcrumb"></nav>
+        <div class="page-title-row">
+          <div class="page-title-block">
+            <div class="page-title-line"><h1 id="page-title"></h1><span id="page-soon-tag" class="tag tag-neutral" hidden>Coming soon</span></div>
+            <div id="hdr-meta"></div>
+          </div>
+          <div class="page-actions">
+            <div id="page-mod-actions"></div>
+            <button class="btn btn-secondary" id="btn-import" hidden>Import</button>
+            <button class="btn btn-secondary" id="btn-export" hidden>Export</button>
+            <button class="btn btn-secondary" id="btn-reset" hidden>Reset</button>
+            <button class="btn btn-secondary" id="btn-print">Print</button>
+          </div>
+        </div>
+        <div id="hdr-tabs"></div>
+      </div>
+      <div class="module-host" id="module-host">
+        <div id="soon-root" class="soon-root" hidden></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="pop-scrim" class="pop-scrim" hidden></div>
+  <div id="pop"></div>
+</div>
+
+<!-- Core (shared by all modules) -->
+<script src="assets/js/core/util.js"></script>
+<script src="assets/js/core/units.js"></script>
+<script src="assets/js/core/hydraulics.js"></script>
+<script src="assets/js/core/pipes.js"></script>
+<script src="assets/js/core/fluids.js"></script>
+<script src="assets/js/core/csv.js"></script>
+<script src="assets/js/core/api.js"></script>
+<script src="assets/js/core/values.js"></script>
+<script src="assets/data/fittings/recommended_v1.js"></script>
+<script src="assets/js/core/fittings.js"></script>
+<script src="assets/js/core/pipeclass.js"></script>
+<script src="assets/js/core/route.js"></script>
+<script src="assets/js/core/pumpcurve.js"></script>
+<script src="assets/js/core/pumplib.js"></script>
+<script src="assets/js/core/equiplib.js"></script>
+<script src="assets/js/core/ui.js"></script>
+<script src="assets/js/core/authui.js"></script>
+<script src="assets/js/core/fluidui.js"></script>
+<script src="assets/js/core/svgchart.js"></script>
+<script src="assets/js/core/nav.js"></script>
+<script src="assets/js/core/alerts.js"></script>
+<script src="assets/js/core/app.js"></script>
+
+<!-- Modules -->
+<script src="modules/home/home.js"></script>
+<script src="modules/intake/intake_calc.js"></script>
+<script src="modules/intake/intake.js"></script>
+<script src="modules/libraries/libraries.js"></script>
+<script src="modules/tools/tools.js"></script>
+<script src="modules/pipeline/pipeline_calc.js"></script>
+<script src="modules/pipeline/pipeline.js"></script>
+<script src="modules/buoyancy/buoyancy_calc.js"></script>
+<script src="modules/buoyancy/buoyancy.js"></script>
+<script src="modules/bom/bom_calc.js"></script>
+<script src="modules/bom/bom.js"></script>
+<script src="modules/pretreat/pretreat_calc.js"></script>
+<script src="modules/pretreat/pretreat.js"></script>
+<script src="modules/pdftools/pdftools.js"></script>
+
+<script>RO.app.start();</script>
+</body>
+</html>
